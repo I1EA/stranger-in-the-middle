@@ -73,7 +73,7 @@
 
             <!-- Share Banner -->
             <div id="shareBanner" class="share-banner hidden">
-                <span>🔗 <strong>Invite Group:</strong> Share this session link with friends to vote together!</span>
+                <span> <strong>Invite Group:</strong> Share this session link with friends to vote together!</span>
                 <button class="btn-sm btn-copy" onclick="copySessionLink()">Copy Invite Link</button>
             </div>
 
@@ -772,7 +772,7 @@
             renderSeats();
             document.getElementById('agentStatus').textContent = 'Paid for seat ' + userLabel + '.';
             updateStatus('You paid for seat ' + userLabel + '. Group booking confirmed.');
-            showToast('🎟️ Seat ' + userLabel + ' confirmed & paid!');
+            showToast(' Seat ' + userLabel + ' confirmed & paid!');
         });
 
         // Agent books all (Stranger In The Middle books everyone)
@@ -798,7 +798,7 @@
                 renderSeats();
                 document.getElementById('agentStatus').textContent = 'Stranger In The Middle booked all seats!';
                 updateStatus('Stranger booked seats ' + nums.map(n => seatLabel(n - 1)).join(', ') + ' for everyone.');
-                showToast('🚀 Stranger In The Middle booked all tickets successfully!');
+                showToast('Stranger In The Middle booked all tickets successfully!');
             } else {
                 document.getElementById('agentStatus').textContent = 'Booking failed: ' + result.error;
                 updateStatus('Stranger booking failed.');
