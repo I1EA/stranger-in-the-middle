@@ -1,0 +1,54 @@
+{
+  "name": "stranger-in-the-middle",
+  "version": "1.0.0",
+  "description": "Stranger In The Middle (SITM) - AI-coordinated group cinema seat voting and booking with WebMCP",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon -e js,ejs,css server.js",
+    "build:css": "npx @tailwindcss/cli -i ./public/src/main.css -o ./public/src/output.css --watch",
+    "build": "npx @tailwindcss/cli -i ./public/src/main.css -o ./public/src/output.css --minify",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "ai-agent",
+    "group-voting",
+    "cinema-booking",
+    "webmcp",
+    "model-context-protocol",
+    "seat-optimization",
+    "express",
+    "ejs",
+    "hackathon"
+  ],
+  "author": "Stranger In The Middle Team",
+  "license": "MIT",
+  "dependencies": {
+    "compression": "^1.8.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "express-session": "^1.19.0",
+    "helmet": "^8.3.0",
+    "morgan": "^1.12.0",
+    "pg": "^8.23.0",
+    "tailwindcss": "^4.3.3",
+    "uuid": "^14.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "browser-sync": "^3.0.4",
+    "concurrently": "^10.0.5",
+    "jest": "^30.5.1",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
+  }
+}

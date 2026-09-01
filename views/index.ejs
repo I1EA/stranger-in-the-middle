@@ -3,468 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stranger In The Middle · Group Seat Voting</title>
-    <script src="https://unpkg.com/@mcp-b/webmcp-polyfill@latest/dist/index.iife.js">
-    </script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(ellipse at top left, #1a0a2e, #4a0a1a, #1a0a2e);
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            padding: 20px;
-        }
-        .card {
-            max-width: 920px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(4px);
-            border-radius: 32px;
-            padding: 32px 28px;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 0 2px #cc0000 inset;
-        }
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        .logo {
-            width: 56px;
-            height: 56px;
-            background: #cc0000;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 14px;
-            color: #fff;
-            border: 3px solid #1a0a2e;
-            flex-shrink: 0;
-            text-align: center;
-            line-height: 1.2;
-        }
-        .header h1 {
-            font-size: 26px;
-            font-weight: 800;
-            color: #1a0a2e;
-        }
-        .header .tag {
-            color: #cc0000;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .header .sub {
-            color: #4b5563;
-            font-size: 13px;
-        }
-
-        .movie-card {
-            border: 2px solid #cc0000;
-            border-radius: 20px;
-            padding: 20px 24px;
-            background: linear-gradient(135deg, #fff5f5, #f0f0ff);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-        .movie-card h2 {
-            font-size: 22px;
-            font-weight: 700;
-            color: #cc0000;
-        }
-        .movie-card .meta {
-            color: #4b5563;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        .movie-card .detail {
-            color: #6b7280;
-            font-size: 13px;
-        }
-        .badge {
-            background: #cc0000;
-            color: #fff;
-            font-weight: 700;
-            font-size: 11px;
-            padding: 6px 14px;
-            border-radius: 40px;
-            animation: pulse 1.8s infinite;
-        }
-        @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-        .btn-primary {
-            background: #cc0000;
-            border: none;
-            color: #fff;
-            font-weight: 700;
-            font-size: 16px;
-            padding: 12px 32px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-primary:hover {
-            background: #990000;
-            transform: scale(1.02);
-        }
-        .btn-secondary {
-            background: #1a0a2e;
-            border: none;
-            color: #fff;
-            font-weight: 600;
-            padding: 10px 24px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-secondary:hover {
-            background: #2d1a4a;
-        }
-        .btn-success {
-            background: #0b7e3d;
-            border: none;
-            color: #fff;
-            font-weight: 600;
-            padding: 10px 28px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-success:hover {
-            background: #0a5f2e;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #1a0a2e;
-            color: #1a0a2e;
-            font-weight: 600;
-            padding: 8px 20px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-outline:hover {
-            background: #1a0a2e;
-            color: #fff;
-        }
-        .btn-danger {
-            background: #dc2626;
-            border: none;
-            color: #fff;
-            font-weight: 600;
-            padding: 10px 24px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-danger:hover {
-            background: #b91c1c;
-        }
-
-        .controls {
-            background: #f1f3f5;
-            border-radius: 16px;
-            padding: 16px 20px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 14px;
-            margin: 16px 0 12px 0;
-        }
-        .controls label {
-            font-weight: 600;
-            font-size: 14px;
-            color: #1f2937;
-        }
-        .controls select {
-            padding: 8px 14px;
-            border-radius: 40px;
-            border: 1px solid #d1d5db;
-            background: #fff;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .voting-bar {
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
-            border-radius: 12px;
-            padding: 12px 18px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin: 10px 0 14px 0;
-        }
-        .voting-bar .timer {
-            font-size: 24px;
-            font-weight: 800;
-            color: #92400e;
-            font-variant-numeric: tabular-nums;
-        }
-        .voting-bar .status-text {
-            font-weight: 600;
-            color: #78350f;
-            font-size: 14px;
-        }
-
-        .rec-wrap {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin: 14px 0 10px 0;
-            justify-content: center;
-        }
-        .rec-card {
-            flex: 1 1 150px;
-            min-width: 130px;
-            background: #fff;
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 14px 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-            position: relative;
-        }
-        .rec-card:hover {
-            border-color: #6b7280;
-            transform: translateY(-3px);
-        }
-        .rec-card.active {
-            border-color: #2563eb;
-            background: #eff6ff;
-        }
-        .rec-card.voted {
-            border-color: #22c55e;
-            background: #f0fdf4;
-        }
-        .rec-card .label {
-            font-weight: 700;
-            font-size: 15px;
-            color: #1f2937;
-        }
-        .rec-card .desc {
-            font-size: 12px;
-            color: #6b7280;
-            margin: 4px 0;
-        }
-        .rec-card .vote-count {
-            font-size: 20px;
-            font-weight: 800;
-            color: #1a0a2e;
-            margin-top: 4px;
-        }
-        .rec-card .vote-btn {
-            margin-top: 6px;
-            padding: 4px 16px;
-            border-radius: 30px;
-            border: none;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
-            background: #e5e7eb;
-            color: #1f2937;
-            transition: 0.2s;
-        }
-        .rec-card .vote-btn:hover {
-            background: #d1d5db;
-        }
-        .rec-card .vote-btn.voted-btn {
-            background: #22c55e;
-            color: #fff;
-        }
-        .rec-card .vote-btn.voted-btn:hover {
-            background: #16a34a;
-        }
-        .rec-card .tag-sm {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 2px 10px;
-            border-radius: 30px;
-            display: inline-block;
-            margin-top: 4px;
-        }
-        .tag-best {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        .tag-legroom {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        .tag-balanced {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        .tag-winner {
-            background: #fbbf24;
-            color: #78350f;
-            font-weight: 700;
-        }
-
-        .screen {
-            background: #1a0a2e;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 10px;
-            margin: 16px 0 14px 0;
-        }
-        .seat-grid {
-            display: grid;
-            grid-template-columns: 28px repeat(8, 1fr);
-            gap: 5px;
-            max-width: 560px;
-            margin: 0 auto;
-        }
-        .seat {
-            text-align: center;
-            padding: 8px 0;
-            border-radius: 6px 6px 10px 10px;
-            font-size: 11px;
-            font-weight: 600;
-            border: 1px solid #d1d5db;
-            transition: 0.15s;
-            cursor: default;
-        }
-        .seat-avail {
-            background: #e5e7eb;
-            color: #1f2937;
-            cursor: pointer;
-        }
-        .seat-avail:hover {
-            background: #b3d4ff;
-            transform: scale(1.04);
-        }
-        .seat-taken {
-            background: #ef4444;
-            color: #fff;
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .seat-suggested {
-            background: #3b82f6;
-            color: #fff;
-            border-color: #2563eb;
-        }
-        .seat-selected {
-            background: #22c55e;
-            color: #fff;
-            border-color: #16a34a;
-        }
-        .seat-voted {
-            background: #fbbf24;
-            color: #1a0a2e;
-            border-color: #f59e0b;
-        }
-        .row-label {
-            font-weight: 600;
-            font-size: 12px;
-            color: #6b7280;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .legend {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin: 14px 0 8px 0;
-            font-size: 12px;
-            color: #4b5563;
-        }
-        .legend span {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-            margin-right: 4px;
-            vertical-align: middle;
-        }
-
-        .status {
-            background: #f1f3f5;
-            border-radius: 12px;
-            padding: 12px 18px;
-            font-size: 14px;
-            color: #1f2937;
-            border: 1px solid #e5e7eb;
-            margin-top: 16px;
-        }
-        .status .highlight {
-            color: #cc0000;
-            font-weight: 600;
-        }
-
-        .flex-center {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 14px;
-        }
-        .hidden {
-            display: none !important;
-        }
-        .footer-note {
-            margin-top: 14px;
-            font-size: 11px;
-            color: #9ca3af;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 14px;
-            text-align: center;
-        }
-
-        @media (max-width: 600px) {
-            .card {
-                padding: 18px 14px;
-            }
-            .header h1 {
-                font-size: 20px;
-            }
-            .movie-card {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .seat-grid {
-                gap: 3px;
-            }
-            .seat {
-                font-size: 9px;
-                padding: 6px 0;
-            }
-            .voting-bar {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-    </style>
+    <title>Stranger In The Middle · Group Seat Voting & AI Coordinator</title>
+    <!-- WebMCP Polyfill for Model Context Protocol in Browser / ChatGPT -->
+    <script src="https://unpkg.com/@mcp-b/webmcp-polyfill@latest/dist/index.iife.js"></script>
+    <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
 
@@ -476,35 +18,63 @@
             <div>
                 <h1>Stranger In The Middle</h1>
                 <div class="tag">Group Seat Voting · AI Coordinator</div>
-                <div class="sub">Each person votes · 2 minute timer · Winner gets booked</div>
+                <div class="sub">Each person votes · 2 minute timer · AI optimizes seat blocks · Winner gets booked</div>
             </div>
         </div>
 
         <!-- MOVIE LIST -->
         <div id="movieList">
-            <div class="movie-card">
-                <div class="movie-info">
-                    <h2>Spider-Man: Beyond the Spider-Verse</h2>
-                    <div class="meta">London Premiere · Odeon Luxe Leicester Square</div>
-                    <div class="detail">Tonight, 7:00 PM · 2h 20min</div>
-                    <div class="detail" style="color:#2563eb; margin-top:4px;">Stranger In The Middle coordinates group voting</div>
-                </div>
-                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-                    <span class="badge">SELLING FAST</span>
-                    <button class="btn-primary" onclick="startSession('spiderman')">Start Group Session</button>
-                </div>
+            <div class="movie-grid">
+                <% if (typeof movies !== 'undefined' && Array.isArray(movies) && movies.length > 0) { %>
+                    <% movies.forEach(function(m) { %>
+                        <div class="movie-card" data-movie-id="<%= m.id %>">
+                            <div class="movie-info">
+                                <h2><%= m.title %></h2>
+                                <div class="meta"><%= m.venue %> · <%= m.screen || 'Main Screen' %></div>
+                                <div class="detail">Tonight, <%= m.time %> · <%= m.duration %> · <%= m.rating %> · £<%= Number(m.ticketPrice).toFixed(2) %>/ticket</div>
+                                <div class="detail" style="color:#2563eb; margin-top:4px;"><%= m.description || 'Stranger In The Middle coordinates group voting.' %></div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                                <span class="badge" style="background:<%= m.badgeColor || '#cc0000' %>;"><%= m.badge || 'AVAILABLE' %></span>
+                                <button class="btn-primary" onclick="startSession('<%= m.id %>')">Start Group Session</button>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="movie-card" data-movie-id="spiderman">
+                        <div class="movie-info">
+                            <h2>Spider-Man: Beyond the Spider-Verse</h2>
+                            <div class="meta">London Premiere · Odeon Luxe Leicester Square</div>
+                            <div class="detail">Tonight, 7:00 PM · 2h 20min · £18.50/ticket</div>
+                            <div class="detail" style="color:#2563eb; margin-top:4px;">Stranger In The Middle coordinates group voting</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                            <span class="badge">SELLING FAST</span>
+                            <button class="btn-primary" onclick="startSession('spiderman')">Start Group Session</button>
+                        </div>
+                    </div>
+                <% } %>
             </div>
         </div>
 
         <!-- SESSION -->
         <div id="sessionSection" class="hidden">
 
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; flex-wrap:wrap; gap:10px;">
                 <div>
                     <h2 style="font-size:20px; font-weight:700; color:#1a0a2e;">Group Voting Session</h2>
                     <div style="font-size:13px; color:#6b7280;">Stranger In The Middle coordinates everyone's votes</div>
                 </div>
-                <span id="movieName" style="color:#cc0000; font-weight:600; font-size:14px;"></span>
+                <div style="text-align:right;">
+                    <span id="movieName" style="color:#cc0000; font-weight:600; font-size:14px; display:block;"></span>
+                    <span id="movieDetails" style="color:#6b7280; font-size:12px;"></span>
+                </div>
+            </div>
+
+            <!-- Share Banner -->
+            <div id="shareBanner" class="share-banner hidden">
+                <span>🔗 <strong>Invite Group:</strong> Share this session link with friends to vote together!</span>
+                <button class="btn-sm btn-copy" onclick="copySessionLink()">Copy Invite Link</button>
             </div>
 
             <!-- Controls -->
@@ -518,6 +88,7 @@
                     <option value="6">6</option>
                 </select>
                 <button class="btn-secondary" id="findBtn">Find Seats</button>
+                <button class="btn-outline" onclick="backToMovies()" style="padding:6px 16px; font-size:13px;">Change Movie</button>
                 <span id="agentStatus" style="font-size:13px; color:#2563eb; font-weight:500;"></span>
             </div>
 
@@ -551,38 +122,85 @@
 
             <!-- Action buttons -->
             <div class="flex-center">
-                <button class="btn-success" id="bookBtn" style="display:none;">Confirm and Pay</button>
+                <button class="btn-success" id="bookBtn" style="display:none;">Confirm and Pay (My Seat)</button>
                 <button class="btn-secondary" id="agentBookBtn" style="display:none;">Stranger Books All</button>
                 <button class="btn-outline" id="resetBtn">Reset Session</button>
             </div>
 
             <div style="margin-top:14px; background:#fef9e7; border:1px solid #f59e0b; border-radius:12px; padding:12px 16px; font-size:13px; color:#78350f;">
-                <strong>How it works:</strong> Stranger In The Middle finds the 3 best seat blocks. Everyone in the group votes for their favorite. After 2 minutes, the option with the most votes wins. Each person pays for their own seat.
+                <strong>How it works:</strong> Stranger In The Middle finds the 3 best contiguous seat blocks scored by viewing angle and legroom. Everyone in the group votes for their favorite. After 2 minutes (or when all vote), the option with the most votes wins. Each person can pay for their own seat, or the SITM agent books all.
             </div>
         </div>
 
         <!-- STATUS -->
         <div class="status" id="statusBar">Status: <span class="highlight">Ready</span> — start a group session to begin.</div>
 
-        <div class="footer-note">Open in ChatGPT in-app browser · or Chrome with WebMCP flag enabled</div>
+        <div class="footer-note">
+            Powered by <strong>Stranger In The Middle (SITM)</strong> · Open in ChatGPT in-app browser or Chrome with WebMCP flag enabled
+        </div>
     </div>
 
+    <!-- INITIAL SERVER DATA INJECTION -->
     <script>
-        // DATA
-        const movies = {
+        window.__SERVER_DATA__ = {
+            movies: <%- JSON.stringify(typeof movies !== 'undefined' ? movies : []) %>,
+            initialSessionId: <%- JSON.stringify(typeof initialSessionId !== 'undefined' ? initialSessionId : null) %>
+        };
+    </script>
+
+    <script>
+        // DATA CATALOG
+        const defaultMovies = {
             spiderman: {
+                id: 'spiderman',
                 title: 'Spider-Man: Beyond the Spider-Verse',
                 time: '7:00 PM',
-                venue: 'Odeon Luxe Leicester Square'
+                venue: 'Odeon Luxe Leicester Square',
+                screen: 'Screen 1 · Dolby Cinema',
+                ticketPrice: 18.50
+            },
+            dune2: {
+                id: 'dune2',
+                title: 'Dune: Part Two (IMAX 70mm)',
+                time: '8:30 PM',
+                venue: 'BFI IMAX Waterloo',
+                screen: 'Grand IMAX Screen',
+                ticketPrice: 24.00
+            },
+            oppenheimer: {
+                id: 'oppenheimer',
+                title: 'Oppenheimer (70mm Exclusive)',
+                time: '6:15 PM',
+                venue: 'Science Museum IMAX',
+                screen: 'Ronson Theatre',
+                ticketPrice: 20.00
+            },
+            deadpool: {
+                id: 'deadpool',
+                title: 'Deadpool & Wolverine',
+                time: '9:15 PM',
+                venue: 'Vue Cinema West End',
+                screen: 'Screen 3 · Recliner Luxe',
+                ticketPrice: 16.50
             }
         };
+
+        const movies = {};
+        if (window.__SERVER_DATA__ && window.__SERVER_DATA__.movies && window.__SERVER_DATA__.movies.length > 0) {
+            window.__SERVER_DATA__.movies.forEach(m => {
+                movies[m.id] = m;
+            });
+        } else {
+            Object.assign(movies, defaultMovies);
+        }
 
         const ROWS = 6;
         const COLS = 8;
         const TOTAL = ROWS * COLS;
 
+        let currentSessionId = window.__SERVER_DATA__?.initialSessionId || null;
         let available = [];
-        let selectedMovieId = null;
+        let selectedMovieId = 'spiderman';
         let selectedSeats = [];
         let suggestions = [];
         let currentSuggestionIdx = -1;
@@ -597,26 +215,62 @@
         let sessionActive = false;
 
         // Helpers
+        function showToast(msg) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
+        }
+
+        function copySessionLink() {
+            const link = window.location.origin + '/session/' + (currentSessionId || 'spiderman-group');
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(link).then(() => {
+                    showToast('🔗 Invite link copied to clipboard!');
+                }).catch(() => {
+                    prompt('Copy this invite link for your group:', link);
+                });
+            } else {
+                prompt('Copy this invite link for your group:', link);
+            }
+        }
+
         function shuffleSome() {
             available = new Array(TOTAL).fill(true);
             const count = Math.floor(Math.random() * 6) + 6;
             let done = 0;
             while (done < count) {
                 const idx = Math.floor(Math.random() * TOTAL);
-                if (available[idx]) { available[idx] = false;
-                    done++; }
+                if (available[idx]) {
+                    available[idx] = false;
+                    done++;
+                }
             }
         }
 
         function seatIndex(row, col) { return row * COLS + col; }
-
         function seatNumber(idx) { return idx + 1; }
+        function seatLabel(idx) {
+            const rowLetter = 'ABCDEF'[Math.floor(idx / COLS)] || '?';
+            const colNum = (idx % COLS) + 1;
+            return rowLetter + colNum;
+        }
 
         function updateStatus(msg) {
             document.getElementById('statusBar').innerHTML = 'Status: <span class="highlight">' + msg + '</span>';
         }
 
-        // Score
+        function backToMovies() {
+            clearInterval(timerInterval);
+            document.getElementById('sessionSection').classList.add('hidden');
+            document.getElementById('movieList').classList.remove('hidden');
+            updateStatus('Ready — select a movie to start a group session.');
+        }
+
+        // Score Calculation
         function scoreBlock(seats) {
             let total = 0;
             for (let i = 0; i < seats.length; i++) {
@@ -639,15 +293,16 @@
 
         function describe(row, startCol, groupSize) {
             const centerDist = Math.abs((startCol + groupSize / 2) - 3.5);
-            let view = centerDist < 1.5 ? 'Center view' : centerDist < 3 ? 'Good view' : 'Side view';
+            let view = centerDist < 1.5 ? 'Center view' : centerDist < 2.8 ? 'Good view' : 'Side view';
             let leg = row === 0 ? 'Extra legroom' : row <= 2 ? 'Good legroom' : 'Standard legroom';
             return { view, leg };
         }
 
-        // Find best blocks
+        // Find Best Blocks
         function findBestBlocks(groupSize) {
             const blocks = [];
 
+            // Horizontal blocks
             for (let row = 0; row < ROWS; row++) {
                 for (let start = 0; start <= COLS - groupSize; start++) {
                     const seats = [];
@@ -665,6 +320,7 @@
                 }
             }
 
+            // Vertical fallback if not enough
             if (blocks.length < 3) {
                 for (let col = 0; col < COLS; col++) {
                     for (let startRow = 0; startRow <= ROWS - groupSize; startRow++) {
@@ -682,8 +338,7 @@
                             for (let b of blocks) {
                                 if (b.seats.join(',') === seats.join(',')) { dup = true; break; }
                             }
-                            if (!dup) blocks.push({ seats, score, row: startRow, start: col, view: desc.view, leg: desc
-                                    .leg, votes: 0 });
+                            if (!dup) blocks.push({ seats, score, row: startRow, start: col, view: desc.view, leg: desc.leg, votes: 0 });
                         }
                     }
                 }
@@ -693,7 +348,7 @@
             return blocks.slice(0, 3);
         }
 
-        // Render seats
+        // Render Seats
         function renderSeats() {
             const container = document.getElementById('seatGrid');
             container.innerHTML = '';
@@ -746,16 +401,14 @@
                         (function(i) {
                             seat.onclick = function() {
                                 if (votingActive) {
-                                    document.getElementById('agentStatus').textContent =
-                                        'Voting in progress. Wait for results.';
+                                    document.getElementById('agentStatus').textContent = 'Voting in progress. Wait for results.';
                                     return;
                                 }
                                 const pos = selectedSeats.indexOf(i);
                                 if (pos > -1) selectedSeats.splice(pos, 1);
                                 else selectedSeats.push(i);
                                 renderSeats();
-                                updateStatus('Selected: ' + (selectedSeats.map(s => seatNumber(s)).join(', ') ||
-                                    'none'));
+                                updateStatus('Selected: ' + (selectedSeats.map(s => seatLabel(s)).join(', ') || 'none'));
                             };
                         })(idx);
                     }
@@ -769,7 +422,7 @@
             document.getElementById('agentBookBtn').style.display = show ? 'inline-block' : 'none';
         }
 
-        // Voting logic
+        // Voting Logic
         function startVoting() {
             if (suggestions.length < 2) {
                 document.getElementById('agentStatus').textContent = 'Need at least 2 options to vote.';
@@ -815,6 +468,15 @@
 
             sessionActive = true;
             updateStatus('Voting open! 2 minutes to choose.');
+
+            // Notify backend API if session exists
+            if (currentSessionId) {
+                fetch('/api/sessions/' + currentSessionId + '/start-voting', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ durationSeconds: 120 })
+                }).catch(() => {});
+            }
         }
 
         function castVote(optionIdx) {
@@ -848,10 +510,19 @@
                 }
             });
 
+            // Post vote to API
+            if (currentSessionId) {
+                fetch('/api/sessions/' + currentSessionId + '/vote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ optionIndex: optionIdx, voterName: 'Group Member' })
+                }).catch(() => {});
+            }
+
             const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
             if (totalVotes >= groupSize) {
-                document.getElementById('votingStatus').textContent = 'Everyone voted! Ending early...';
-                setTimeout(endVoting, 1500);
+                document.getElementById('votingStatus').textContent = 'Everyone voted! Finalizing winner...';
+                setTimeout(endVoting, 1200);
             }
         }
 
@@ -884,10 +555,8 @@
 
             if (winnerIdx >= 0 && maxVotes > 0) {
                 const winner = suggestions[winnerIdx];
-                document.getElementById('votingStatus').textContent = 'Winner: Option ' + (winnerIdx + 1) + ' with ' +
-                    maxVotes + ' votes!';
-                document.getElementById('agentStatus').textContent = winner.view + ' · ' + winner.leg +
-                    ' — Selected by group vote!';
+                document.getElementById('votingStatus').textContent = 'Winner: Option ' + (winnerIdx + 1) + ' with ' + maxVotes + ' votes!';
+                document.getElementById('agentStatus').textContent = winner.view + ' · ' + winner.leg + ' — Selected by group vote!';
 
                 selectedSeats = winner.seats.slice();
                 currentSuggestionIdx = winnerIdx;
@@ -910,8 +579,12 @@
                 });
 
                 renderSeats();
-                updateStatus('Winner: Option ' + (winnerIdx + 1) + ' — ' + winner.view + ', ' + winner.leg +
-                    ' (' + maxVotes + ' votes)');
+                updateStatus('Winner: Option ' + (winnerIdx + 1) + ' — ' + winner.view + ', ' + winner.leg + ' (' + maxVotes + ' votes)');
+                showToast('🎉 Winning option selected: Option ' + (winnerIdx + 1) + '!');
+
+                if (currentSessionId) {
+                    fetch('/api/sessions/' + currentSessionId + '/end-voting', { method: 'POST' }).catch(() => {});
+                }
             } else {
                 document.getElementById('votingStatus').textContent = 'No votes cast. Try again.';
                 document.getElementById('agentStatus').textContent = 'No votes. Click "Find Seats" to restart.';
@@ -931,8 +604,8 @@
             }
         }
 
-        // Start session
-        function startSession(id) {
+        // Start Session
+        async function startSession(id) {
             selectedMovieId = id;
             selectedSeats = [];
             suggestions = [];
@@ -943,10 +616,41 @@
             hasVoted = false;
             clearInterval(timerInterval);
 
-            shuffleSome();
+            // Fetch seats or generate random
+            try {
+                const res = await fetch('/api/movies/' + id + '/seats');
+                const json = await res.json();
+                if (json.data && json.data.seats) {
+                    available = [...json.data.seats];
+                } else {
+                    shuffleSome();
+                }
+            } catch (err) {
+                shuffleSome();
+            }
 
+            // Create backend session if possible
+            try {
+                const sessionRes = await fetch('/api/sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ movieId: id, groupSize: parseInt(document.getElementById('groupSize').value) })
+                });
+                const sessionJson = await sessionRes.json();
+                if (sessionJson.data && sessionJson.data.session) {
+                    currentSessionId = sessionJson.data.session.id;
+                }
+            } catch (e) {
+                currentSessionId = 'session_' + Math.random().toString(36).substr(2, 6);
+            }
+
+            document.getElementById('movieList').classList.add('hidden');
             document.getElementById('sessionSection').classList.remove('hidden');
-            document.getElementById('movieName').textContent = movies[id].title;
+            document.getElementById('shareBanner').classList.remove('hidden');
+
+            const mv = movies[id] || { title: id, venue: 'Cinema', time: 'Tonight' };
+            document.getElementById('movieName').textContent = mv.title;
+            document.getElementById('movieDetails').textContent = mv.venue + ' · ' + mv.time;
             document.getElementById('recContainer').innerHTML = '';
             document.getElementById('agentStatus').textContent = '';
             document.getElementById('votingBar').classList.add('hidden');
@@ -954,10 +658,10 @@
             document.getElementById('agentBookBtn').style.display = 'none';
 
             renderSeats();
-            updateStatus('Session started. Click "Find Seats" to get options.');
+            updateStatus('Session started for ' + mv.title + '. Click "Find Seats" to get options.');
         }
 
-        // Find seats
+        // Find Seats Button Click
         document.getElementById('findBtn').addEventListener('click', function() {
             groupSize = parseInt(document.getElementById('groupSize').value);
             const blocks = findBestBlocks(groupSize);
@@ -988,19 +692,17 @@
                 const card = document.createElement('div');
                 card.className = 'rec-card';
 
-                const seatNums = b.seats.map(s => seatNumber(s)).join(', ');
+                const seatLabels = b.seats.map(s => seatLabel(s)).join(', ');
 
                 let badgeHtml = '';
-                if (b.view === 'Center view' && b.leg === 'Extra legroom') badgeHtml =
-                    '<span class="tag-sm tag-best">Best</span>';
-                else if (b.leg === 'Extra legroom') badgeHtml = '<span class="tag-sm tag-legroom">Legroom</span>';
+                if (b.view === 'Center view' && b.leg === 'Extra legroom') badgeHtml = '<span class="tag-sm tag-best">Best Overall</span>';
+                else if (b.leg === 'Extra legroom') badgeHtml = '<span class="tag-sm tag-legroom">Extra Legroom</span>';
                 else if (b.view === 'Center view') badgeHtml = '<span class="tag-sm tag-best">Best View</span>';
-                else if (b.view === 'Good view' && b.leg === 'Good legroom') badgeHtml =
-                    '<span class="tag-sm tag-balanced">Balanced</span>';
+                else if (b.view === 'Good view' && b.leg === 'Good legroom') badgeHtml = '<span class="tag-sm tag-balanced">Balanced</span>';
 
                 card.innerHTML =
                     '<div class="label">Option ' + (i + 1) + '</div>' +
-                    '<div class="desc">Seats ' + seatNums + '</div>' +
+                    '<div class="desc">Seats ' + seatLabels + '</div>' +
                     '<div class="desc">' + b.view + ' · ' + b.leg + '</div>' +
                     '<div class="vote-count">0 votes</div>' +
                     '<button class="vote-btn">Vote</button>' +
@@ -1009,8 +711,7 @@
                 (function(idx) {
                     card.onclick = function() {
                         if (votingActive) {
-                            document.getElementById('agentStatus').textContent =
-                                'Voting in progress. Use the vote button.';
+                            document.getElementById('agentStatus').textContent = 'Voting in progress. Use the vote button.';
                             return;
                         }
                         currentSuggestionIdx = idx;
@@ -1018,8 +719,7 @@
                         document.querySelectorAll('.rec-card').forEach(el => el.classList.remove('active'));
                         card.classList.add('active');
                         const b2 = suggestions[idx];
-                        document.getElementById('agentStatus').textContent = 'Selected: Option ' + (idx + 1) +
-                            ' (seats ' + b2.seats.map(s => seatNumber(s)).join(', ') + ')';
+                        document.getElementById('agentStatus').textContent = 'Selected: Option ' + (idx + 1) + ' (seats ' + b2.seats.map(s => seatLabel(s)).join(', ') + ')';
                         selectedSeats = b2.seats.slice();
                         renderSeats();
                         updateStatus('Selected: Option ' + (idx + 1) + ' — ' + b2.view + ', ' + b2.leg);
@@ -1030,8 +730,7 @@
                         voteBtn.onclick = function(e) {
                             e.stopPropagation();
                             if (!votingActive) {
-                                document.getElementById('agentStatus').textContent =
-                                    'Voting not active. Click "Find Seats" then vote.';
+                                document.getElementById('agentStatus').textContent = 'Voting not active. Click "Find Seats" then vote.';
                                 return;
                             }
                             castVote(idx);
@@ -1043,8 +742,8 @@
             }
 
             // Start voting automatically
-            setTimeout(startVoting, 500);
-            document.getElementById('agentStatus').textContent = 'Voting starting...';
+            setTimeout(startVoting, 400);
+            document.getElementById('agentStatus').textContent = 'AI found ' + blocks.length + ' seat blocks. Voting begins now!';
             updateStatus('Found ' + blocks.length + ' options. Voting begins now.');
         });
 
@@ -1057,11 +756,13 @@
             }
         });
 
-        // Manual booking - each person pays for their own seat
+        // Manual booking - individual payment
         document.getElementById('bookBtn').addEventListener('click', function() {
             if (selectedSeats.length === 0) return;
             const nums = selectedSeats.map(s => seatNumber(s));
-            const userSeat = nums[0]; // Each person pays for their own seat
+            const userSeat = nums[0];
+            const userLabel = seatLabel(selectedSeats[0]);
+
             nums.forEach(n => { available[n - 1] = false; });
             selectedSeats = [];
             suggestions = [];
@@ -1069,8 +770,9 @@
             document.getElementById('recContainer').innerHTML = '';
             document.getElementById('votingBar').classList.add('hidden');
             renderSeats();
-            document.getElementById('agentStatus').textContent = 'Paid for seat ' + userSeat + '.';
-            updateStatus('You paid for seat ' + userSeat + '. Group booking confirmed.');
+            document.getElementById('agentStatus').textContent = 'Paid for seat ' + userLabel + '.';
+            updateStatus('You paid for seat ' + userLabel + '. Group booking confirmed.');
+            showToast('🎟️ Seat ' + userLabel + ' confirmed & paid!');
         });
 
         // Agent books all (Stranger In The Middle books everyone)
@@ -1095,14 +797,15 @@
                 document.getElementById('votingBar').classList.add('hidden');
                 renderSeats();
                 document.getElementById('agentStatus').textContent = 'Stranger In The Middle booked all seats!';
-                updateStatus('Stranger booked seats ' + nums.join(', ') + ' for everyone.');
+                updateStatus('Stranger booked seats ' + nums.map(n => seatLabel(n - 1)).join(', ') + ' for everyone.');
+                showToast('🚀 Stranger In The Middle booked all tickets successfully!');
             } else {
                 document.getElementById('agentStatus').textContent = 'Booking failed: ' + result.error;
                 updateStatus('Stranger booking failed.');
             }
         });
 
-        // Reset
+        // Reset Session
         document.getElementById('resetBtn').addEventListener('click', function() {
             clearInterval(timerInterval);
             votingActive = false;
@@ -1119,28 +822,41 @@
             shuffleSome();
             renderSeats();
             updateStatus('Session reset. Click "Find Seats" to start again.');
+            showToast('🔄 Session reset.');
         });
 
-        // WebMCP
-        const ctx = navigator.modelContext;
-
+        // Book Tickets Core Helper
         function bookTickets(movieId, seats) {
             const indices = seats.map(n => n - 1);
             let allFree = true;
             indices.forEach(i => { if (i < 0 || i >= available.length || !available[i]) allFree = false; });
             if (!allFree) return { success: false, error: 'Seats taken.' };
             indices.forEach(i => { available[i] = false; });
+
+            if (currentSessionId) {
+                fetch('/api/sessions/' + currentSessionId + '/book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seatIndices: indices, bookedBy: 'Stranger In The Middle Agent' })
+                }).catch(() => {});
+            }
+
             return { success: true };
         }
+
+        // =========================================================================
+        // WebMCP Tool Registration (Model Context Protocol in Browser)
+        // =========================================================================
+        const ctx = navigator.modelContext;
 
         if (ctx) {
             ctx.registerTool({
                 name: 'search_movies',
-                description: 'List available movies.',
+                description: 'List available movies, showtimes, venues, and prices.',
                 inputSchema: { type: 'object', properties: {} },
                 execute: async () => {
                     const list = Object.keys(movies).map(id =>
-                        movies[id].title + ' at ' + movies[id].time + ' — ID: ' + id
+                        movies[id].title + ' at ' + movies[id].time + ' (' + movies[id].venue + ') — ID: ' + id
                     );
                     return { content: [{ type: 'text', text: list.join('\n') }] };
                 }
@@ -1148,34 +864,31 @@
 
             ctx.registerTool({
                 name: 'get_available_seats',
-                description: 'Show free seats for a movie.',
+                description: 'Show available seat numbers for a movie.',
                 inputSchema: { type: 'object', properties: { movieId: { type: 'string' } }, required: ['movieId'] },
                 execute: async (input) => {
-                    if (!movies[input.movieId]) return { content: [{ type: 'text', text: 'Movie not found.' }],
-                        isError: true };
-                    const free = available.map((a, i) => a ? i + 1 : null).filter(v => v !== null);
-                    return { content: [{ type: 'text', text: 'Available: ' + free.join(', ') }] };
+                    if (!movies[input.movieId]) return { content: [{ type: 'text', text: 'Movie not found.' }], isError: true };
+                    const free = available.map((a, i) => a ? seatLabel(i) + ' (#' + (i + 1) + ')' : null).filter(Boolean);
+                    return { content: [{ type: 'text', text: 'Available seats for ' + movies[input.movieId].title + ':\n' + free.join(', ') }] };
                 }
             });
 
             ctx.registerTool({
                 name: 'book_tickets',
-                description: 'Book seats for a movie.',
+                description: 'Book seats for a movie on behalf of the group.',
                 inputSchema: {
                     type: 'object',
                     properties: { movieId: { type: 'string' }, seats: { type: 'array', items: { type: 'integer' } } },
                     required: ['movieId', 'seats']
                 },
                 execute: async (input) => {
-                    if (!movies[input.movieId]) return { content: [{ type: 'text', text: 'Movie not found.' }],
-                        isError: true };
+                    if (!movies[input.movieId]) return { content: [{ type: 'text', text: 'Movie not found.' }], isError: true };
                     const result = bookTickets(input.movieId, input.seats);
-                    if (!result.success) return { content: [{ type: 'text', text: 'Error: ' + result.error }],
-                        isError: true };
+                    if (!result.success) return { content: [{ type: 'text', text: 'Error: ' + result.error }], isError: true };
                     renderSeats();
                     document.getElementById('bookBtn').style.display = 'none';
                     document.getElementById('agentBookBtn').style.display = 'none';
-                    return { content: [{ type: 'text', text: 'Booked seats ' + input.seats.join(', ') }] };
+                    return { content: [{ type: 'text', text: 'Booked seats ' + input.seats.map(s => seatLabel(s - 1)).join(', ') + ' for ' + movies[input.movieId].title }] };
                 }
             });
 
@@ -1192,31 +905,43 @@
                     required: ['movieId']
                 },
                 execute: async (input) => {
-                    if (!movies[input.movieId]) return { content: [{ type: 'text', text: 'Movie not found.' }],
-                        isError: true };
+                    if (!movies[input.movieId]) return { content: [{ type: 'text', text: 'Movie not found.' }], isError: true };
                     const gs = input.groupSize || 4;
                     const blocks = findBestBlocks(gs);
-                    if (blocks.length === 0) return { content: [{ type: 'text', text: 'No adjacent seats.' }] };
-                    let out = 'Stranger In The Middle found these options:\n';
+                    if (blocks.length === 0) return { content: [{ type: 'text', text: 'No contiguous seats available for group size ' + gs }] };
+
+                    if (input.voteOption !== undefined && input.voteOption !== null) {
+                        castVote(input.voteOption - 1);
+                        return { content: [{ type: 'text', text: 'Voted for Option ' + input.voteOption }] };
+                    }
+
+                    let out = 'Stranger In The Middle found these optimal options for ' + movies[input.movieId].title + ' (Group of ' + gs + '):\n';
                     for (let i = 0; i < blocks.length; i++) {
                         const b = blocks[i];
-                        out += (i + 1) + '. Seats ' + b.seats.map(s => s + 1).join(',') +
-                            ' | ' + b.view + ' | ' + b.leg + '\n';
+                        out += (i + 1) + '. Seats ' + b.seats.map(s => seatLabel(s)).join(', ') +
+                            ' | ' + b.view + ' | ' + b.leg + ' (Score: ' + b.score.toFixed(1) + ')\n';
                     }
-                    out += '\nEach person votes. Highest votes wins. Each pays for their own seat.';
+                    out += '\nEach member votes on their device. Highest votes win after 2 minutes. Each pays for their own seat.';
                     return { content: [{ type: 'text', text: out }] };
                 }
             });
 
-            updateStatus('WebMCP ready! Stranger In The Middle is active.');
+            updateStatus('WebMCP Active! Stranger In The Middle is ready for agent tool calls.');
         } else {
-            updateStatus('WebMCP not available — use Chrome with flag or ChatGPT browser.');
+            updateStatus('Ready — start a group session to begin.');
         }
 
-        // Expose
+        // Auto-load session if opened via direct URL /session/:id
+        if (window.__SERVER_DATA__ && window.__SERVER_DATA__.initialSessionId) {
+            startSession('spiderman');
+        }
+
+        // Expose helpers globally
         window.startSession = startSession;
         window.renderSeats = renderSeats;
         window.bookTickets = bookTickets;
+        window.copySessionLink = copySessionLink;
+        window.backToMovies = backToMovies;
     </script>
 
 </body>
