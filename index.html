@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stranger In The Middle · Group Seat Voting</title>
+    <script src="https://unpkg.com/@mcp-b/webmcp-polyfill@latest/dist/index.iife.js">
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at top left, #1a0a2e, #4a0a1a, #1a0a2e);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 20px;
+        }
+        .card {
+            max-width: 920px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(4px);
+            border-radius: 32px;
+            padding: 32px 28px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 0 2px #cc0000 inset;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .logo {
+            width: 56px;
+            height: 56px;
+            background: #cc0000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            color: #fff;
+            border: 3px solid #1a0a2e;
+            flex-shrink: 0;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1a0a2e;
+        }
+        .header .tag {
+            color: #cc0000;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .header .sub {
+            color: #4b5563;
+            font-size: 13px;
+        }
+
+        .movie-card {
+            border: 2px solid #cc0000;
+            border-radius: 20px;
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #fff5f5, #f0f0ff);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .movie-card h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #cc0000;
+        }
+        .movie-card .meta {
+            color: #4b5563;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .movie-card .detail {
+            color: #6b7280;
+            font-size: 13px;
+        }
+        .badge {
+            background: #cc0000;
+            color: #fff;
+            font-weight: 700;
+            font-size: 11px;
+            padding: 6px 14px;
+            border-radius: 40px;
+            animation: pulse 1.8s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        .btn-primary {
+            background: #cc0000;
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            padding: 12px 32px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary:hover {
+            background: #990000;
+            transform: scale(1.02);
+        }
+        .btn-secondary {
+            background: #1a0a2e;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-secondary:hover {
+            background: #2d1a4a;
+        }
+        .btn-success {
+            background: #0b7e3d;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-success:hover {
+            background: #0a5f2e;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #1a0a2e;
+            color: #1a0a2e;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-outline:hover {
+            background: #1a0a2e;
+            color: #fff;
+        }
+        .btn-danger {
+            background: #dc2626;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .controls {
+            background: #f1f3f5;
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px;
+            margin: 16px 0 12px 0;
+        }
+        .controls label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1f2937;
+        }
+        .controls select {
+            padding: 8px 14px;
+            border-radius: 40px;
+            border: 1px solid #d1d5db;
+            background: #fff;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .voting-bar {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 12px 18px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 10px 0 14px 0;
+        }
+        .voting-bar .timer {
+            font-size: 24px;
+            font-weight: 800;
+            color: #92400e;
+            font-variant-numeric: tabular-nums;
+        }
+        .voting-bar .status-text {
+            font-weight: 600;
+            color: #78350f;
+            font-size: 14px;
+        }
+
+        .rec-wrap {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 14px 0 10px 0;
+            justify-content: center;
+        }
+        .rec-card {
+            flex: 1 1 150px;
+            min-width: 130px;
+            background: #fff;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 14px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+        }
+        .rec-card:hover {
+            border-color: #6b7280;
+            transform: translateY(-3px);
+        }
+        .rec-card.active {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        .rec-card.voted {
+            border-color: #22c55e;
+            background: #f0fdf4;
+        }
+        .rec-card .label {
+            font-weight: 700;
+            font-size: 15px;
+            color: #1f2937;
+        }
+        .rec-card .desc {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 4px 0;
+        }
+        .rec-card .vote-count {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1a0a2e;
+            margin-top: 4px;
+        }
+        .rec-card .vote-btn {
+            margin-top: 6px;
+            padding: 4px 16px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            background: #e5e7eb;
+            color: #1f2937;
+            transition: 0.2s;
+        }
+        .rec-card .vote-btn:hover {
+            background: #d1d5db;
+        }
+        .rec-card .vote-btn.voted-btn {
+            background: #22c55e;
+            color: #fff;
+        }
+        .rec-card .vote-btn.voted-btn:hover {
+            background: #16a34a;
+        }
+        .rec-card .tag-sm {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .tag-best {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .tag-legroom {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .tag-balanced {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .tag-winner {
+            background: #fbbf24;
+            color: #78350f;
+            font-weight: 700;
+        }
+
+        .screen {
+            background: #1a0a2e;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 10px;
+            margin: 16px 0 14px 0;
+        }
+        .seat-grid {
+            display: grid;
+            grid-template-columns: 28px repeat(8, 1fr);
+            gap: 5px;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+        .seat {
+            text-align: center;
+            padding: 8px 0;
+            border-radius: 6px 6px 10px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid #d1d5db;
+            transition: 0.15s;
+            cursor: default;
+        }
+        .seat-avail {
+            background: #e5e7eb;
+            color: #1f2937;
+            cursor: pointer;
+        }
+        .seat-avail:hover {
+            background: #b3d4ff;
+            transform: scale(1.04);
+        }
+        .seat-taken {
+            background: #ef4444;
+            color: #fff;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .seat-suggested {
+            background: #3b82f6;
+            color: #fff;
+            border-color: #2563eb;
+        }
+        .seat-selected {
+            background: #22c55e;
+            color: #fff;
+            border-color: #16a34a;
+        }
+        .seat-voted {
+            background: #fbbf24;
+            color: #1a0a2e;
+            border-color: #f59e0b;
+        }
+        .row-label {
+            font-weight: 600;
+            font-size: 12px;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 14px 0 8px 0;
+            font-size: 12px;
+            color: #4b5563;
+        }
+        .legend span {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+
+        .status {
+            background: #f1f3f5;
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-size: 14px;
+            color: #1f2937;
+            border: 1px solid #e5e7eb;
+            margin-top: 16px;
+        }
+        .status .highlight {
+            color: #cc0000;
+            font-weight: 600;
+        }
+
+        .flex-center {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .footer-note {
+            margin-top: 14px;
+            font-size: 11px;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 14px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 18px 14px;
+            }
+            .header h1 {
+                font-size: 20px;
+            }
+            .movie-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .seat-grid {
+                gap: 3px;
+            }
+            .seat {
+                font-size: 9px;
+                padding: 6px 0;
+            }
+            .voting-bar {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="logo">SITM</div>
+            <div>
+                <h1>Stranger In The Middle</h1>
+                <div class="tag">Group Seat Voting · AI Coordinator</div>
+                <div class="sub">Each person votes · 2 minute timer · Winner gets booked</div>
+            </div>
+        </div>
+
+        <!-- MOVIE LIST -->
+        <div id="movieList">
+            <div class="movie-card">
+                <div class="movie-info">
+                    <h2>Spider-Man: Beyond the Spider-Verse</h2>
+                    <div class="meta">London Premiere · Odeon Luxe Leicester Square</div>
+                    <div class="detail">Tonight, 7:00 PM · 2h 20min</div>
+                    <div class="detail" style="color:#2563eb; margin-top:4px;">Stranger In The Middle coordinates group voting</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <span class="badge">SELLING FAST</span>
+                    <button class="btn-primary" onclick="startSession('spiderman')">Start Group Session</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SESSION -->
+        <div id="sessionSection" class="hidden">
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                <div>
+                    <h2 style="font-size:20px; font-weight:700; color:#1a0a2e;">Group Voting Session</h2>
+                    <div style="font-size:13px; color:#6b7280;">Stranger In The Middle coordinates everyone's votes</div>
+                </div>
+                <span id="movieName" style="color:#cc0000; font-weight:600; font-size:14px;"></span>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <label for="groupSize">Group size</label>
+                <select id="groupSize">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4" selected>4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                </select>
+                <button class="btn-secondary" id="findBtn">Find Seats</button>
+                <span id="agentStatus" style="font-size:13px; color:#2563eb; font-weight:500;"></span>
+            </div>
+
+            <!-- Voting Bar -->
+            <div id="votingBar" class="voting-bar hidden">
+                <div>
+                    <div class="status-text" id="votingStatus">Waiting for votes...</div>
+                    <div style="font-size:12px; color:#78350f;">Each person votes for their preferred option</div>
+                </div>
+                <div class="timer" id="timerDisplay">2:00</div>
+                <button class="btn-danger" id="endVotingBtn" style="padding:6px 16px; font-size:13px;">End Voting Early</button>
+            </div>
+
+            <!-- Recommendations -->
+            <div id="recContainer" class="rec-wrap"></div>
+
+            <!-- Screen -->
+            <div class="screen">SCREEN</div>
+
+            <!-- Seat grid -->
+            <div id="seatGrid" class="seat-grid"></div>
+
+            <!-- Legend -->
+            <div class="legend">
+                <span><span style="background:#e5e7eb;"></span> Available</span>
+                <span><span style="background:#22c55e;"></span> Selected</span>
+                <span><span style="background:#ef4444;"></span> Taken</span>
+                <span><span style="background:#3b82f6;"></span> Suggested</span>
+                <span><span style="background:#fbbf24;"></span> Winning Seats</span>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex-center">
+                <button class="btn-success" id="bookBtn" style="display:none;">Confirm and Pay</button>
+                <button class="btn-secondary" id="agentBookBtn" style="display:none;">Stranger Books All</button>
+                <button class="btn-outline" id="resetBtn">Reset Session</button>
+            </div>
+
+            <div style="margin-top:14px; background:#fef9e7; border:1px solid #f59e0b; border-radius:12px; padding:12px 16px; font-size:13px; color:#78350f;">
+                <strong>How it works:</strong> Stranger In The Middle finds the 3 best seat blocks. Everyone in the group votes for their favorite. After 2 minutes, the option with the most votes wins. Each person pays for their own seat.
+            </div>
+        </div>
+
+        <!-- STATUS -->
+        <div class="status" id="statusBar">Status: <span class="highlight">Ready</span> — start a group session to begin.</div>
+
+        <div class="footer-note">Open in ChatGPT in-app browser · or Chrome with WebMCP flag enabled</div>
+    </div>
+
+    <script>
+        // DATA
+        const movies = {
+            spiderman: {
+                title: 'Spider-Man: Beyond the Spider-Verse',
+                time: '7:00 PM',
+                venue: 'Odeon Luxe Leicester Square'
+            }
+        };
+
+        const ROWS = 6;
+        const COLS = 8;
+        const TOTAL = ROWS * COLS;
+
+        let available = [];
+        let selectedMovieId = null;
+        let selectedSeats = [];
+        let suggestions = [];
+        let currentSuggestionIdx = -1;
+
+        // Voting state
+        let votes = {};
+        let timerInterval = null;
+        let timeLeft = 120;
+        let votingActive = false;
+        let groupSize = 4;
+        let hasVoted = false;
+        let sessionActive = false;
+
+        // Helpers
+        function shuffleSome() {
+            available = new Array(TOTAL).fill(true);
+            const count = Math.floor(Math.random() * 6) + 6;
+            let done = 0;
+            while (done < count) {
+                const idx = Math.floor(Math.random() * TOTAL);
+                if (available[idx]) { available[idx] = false;
+                    done++; }
+            }
+        }
+
+        function seatIndex(row, col) { return row * COLS + col; }
+
+        function seatNumber(idx) { return idx + 1; }
+
+        function updateStatus(msg) {
+            document.getElementById('statusBar').innerHTML = 'Status: <span class="highlight">' + msg + '</span>';
+        }
+
+        // Score
+        function scoreBlock(seats) {
+            let total = 0;
+            for (let i = 0; i < seats.length; i++) {
+                const idx = seats[i];
+                const row = Math.floor(idx / COLS);
+                const col = idx % COLS;
+                const centerDist = Math.abs(col - 3.5);
+                const viewScore = 10 - centerDist * 2.2;
+                let legScore = 0;
+                if (row === 0) legScore = 9;
+                else if (row === 1) legScore = 7;
+                else if (row === 2) legScore = 6;
+                else if (row === 3) legScore = 4;
+                else if (row === 4) legScore = 2;
+                else legScore = 0;
+                total += viewScore + legScore;
+            }
+            return total / seats.length;
+        }
+
+        function describe(row, startCol, groupSize) {
+            const centerDist = Math.abs((startCol + groupSize / 2) - 3.5);
+            let view = centerDist < 1.5 ? 'Center view' : centerDist < 3 ? 'Good view' : 'Side view';
+            let leg = row === 0 ? 'Extra legroom' : row <= 2 ? 'Good legroom' : 'Standard legroom';
+            return { view, leg };
+        }
+
+        // Find best blocks
+        function findBestBlocks(groupSize) {
+            const blocks = [];
+
+            for (let row = 0; row < ROWS; row++) {
+                for (let start = 0; start <= COLS - groupSize; start++) {
+                    const seats = [];
+                    let valid = true;
+                    for (let c = start; c < start + groupSize; c++) {
+                        const idx = seatIndex(row, c);
+                        if (!available[idx]) { valid = false; break; }
+                        seats.push(idx);
+                    }
+                    if (valid && seats.length === groupSize) {
+                        const score = scoreBlock(seats);
+                        const desc = describe(row, start, groupSize);
+                        blocks.push({ seats, score, row, start, view: desc.view, leg: desc.leg, votes: 0 });
+                    }
+                }
+            }
+
+            if (blocks.length < 3) {
+                for (let col = 0; col < COLS; col++) {
+                    for (let startRow = 0; startRow <= ROWS - groupSize; startRow++) {
+                        const seats = [];
+                        let valid = true;
+                        for (let r = startRow; r < startRow + groupSize; r++) {
+                            const idx = seatIndex(r, col);
+                            if (!available[idx]) { valid = false; break; }
+                            seats.push(idx);
+                        }
+                        if (valid && seats.length === groupSize) {
+                            const score = scoreBlock(seats);
+                            const desc = describe(startRow, col, groupSize);
+                            let dup = false;
+                            for (let b of blocks) {
+                                if (b.seats.join(',') === seats.join(',')) { dup = true; break; }
+                            }
+                            if (!dup) blocks.push({ seats, score, row: startRow, start: col, view: desc.view, leg: desc
+                                    .leg, votes: 0 });
+                        }
+                    }
+                }
+            }
+
+            blocks.sort((a, b) => b.score - a.score);
+            return blocks.slice(0, 3);
+        }
+
+        // Render seats
+        function renderSeats() {
+            const container = document.getElementById('seatGrid');
+            container.innerHTML = '';
+            const rowLabels = 'ABCDEF';
+
+            let winningSeats = [];
+            if (!votingActive && suggestions.length > 0) {
+                let maxVotes = -1;
+                let winnerIdx = -1;
+                for (let i = 0; i < suggestions.length; i++) {
+                    if (suggestions[i].votes > maxVotes) {
+                        maxVotes = suggestions[i].votes;
+                        winnerIdx = i;
+                    }
+                }
+                if (winnerIdx >= 0 && maxVotes > 0) {
+                    winningSeats = suggestions[winnerIdx].seats;
+                }
+            }
+
+            for (let row = 0; row < ROWS; row++) {
+                const label = document.createElement('div');
+                label.className = 'row-label';
+                label.textContent = rowLabels[row];
+                container.appendChild(label);
+
+                for (let col = 0; col < COLS; col++) {
+                    const idx = seatIndex(row, col);
+                    const seat = document.createElement('div');
+                    seat.textContent = col + 1;
+
+                    const isSelected = selectedSeats.includes(idx);
+                    const isSuggested = suggestions.length > 0 &&
+                        currentSuggestionIdx >= 0 &&
+                        suggestions[currentSuggestionIdx] &&
+                        suggestions[currentSuggestionIdx].seats.includes(idx);
+                    const isWinning = winningSeats.includes(idx);
+
+                    let cls = 'seat ';
+                    if (!available[idx]) cls += 'seat-taken';
+                    else if (isWinning && !votingActive) cls += 'seat-voted';
+                    else if (isSuggested) cls += 'seat-suggested';
+                    else if (isSelected) cls += 'seat-selected';
+                    else cls += 'seat-avail';
+
+                    seat.className = cls;
+                    seat.dataset.idx = idx;
+
+                    if (available[idx]) {
+                        (function(i) {
+                            seat.onclick = function() {
+                                if (votingActive) {
+                                    document.getElementById('agentStatus').textContent =
+                                        'Voting in progress. Wait for results.';
+                                    return;
+                                }
+                                const pos = selectedSeats.indexOf(i);
+                                if (pos > -1) selectedSeats.splice(pos, 1);
+                                else selectedSeats.push(i);
+                                renderSeats();
+                                updateStatus('Selected: ' + (selectedSeats.map(s => seatNumber(s)).join(', ') ||
+                                    'none'));
+                            };
+                        })(idx);
+                    }
+
+                    container.appendChild(seat);
+                }
+            }
+
+            const show = selectedSeats.length > 0 && !votingActive;
+            document.getElementById('bookBtn').style.display = show ? 'inline-block' : 'none';
+            document.getElementById('agentBookBtn').style.display = show ? 'inline-block' : 'none';
+        }
+
+        // Voting logic
+        function startVoting() {
+            if (suggestions.length < 2) {
+                document.getElementById('agentStatus').textContent = 'Need at least 2 options to vote.';
+                return;
+            }
+
+            votingActive = true;
+            hasVoted = false;
+            votes = {};
+            for (let i = 0; i < suggestions.length; i++) {
+                votes[i] = 0;
+                suggestions[i].votes = 0;
+            }
+
+            document.getElementById('votingBar').classList.remove('hidden');
+            document.getElementById('votingStatus').textContent = 'Vote for your preferred seats!';
+            document.getElementById('agentStatus').textContent = 'Voting open! Choose your option.';
+
+            timeLeft = 120;
+            updateTimerDisplay();
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(function() {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    endVoting();
+                }
+            }, 1000);
+
+            document.querySelectorAll('.rec-card').forEach(function(card, idx) {
+                const btn = card.querySelector('.vote-btn');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Vote';
+                    btn.className = 'vote-btn';
+                    btn.onclick = function(e) {
+                        e.stopPropagation();
+                        castVote(idx);
+                    };
+                }
+            });
+
+            sessionActive = true;
+            updateStatus('Voting open! 2 minutes to choose.');
+        }
+
+        function castVote(optionIdx) {
+            if (!votingActive) {
+                document.getElementById('agentStatus').textContent = 'Voting has ended.';
+                return;
+            }
+            if (hasVoted) {
+                document.getElementById('agentStatus').textContent = 'You already voted!';
+                return;
+            }
+
+            votes[optionIdx] = (votes[optionIdx] || 0) + 1;
+            suggestions[optionIdx].votes = votes[optionIdx];
+            hasVoted = true;
+
+            document.getElementById('votingStatus').textContent = 'You voted! Waiting for others...';
+            document.getElementById('agentStatus').textContent = 'Vote cast for Option ' + (optionIdx + 1);
+
+            // Update vote display
+            document.querySelectorAll('.rec-card').forEach(function(card, idx) {
+                const countEl = card.querySelector('.vote-count');
+                if (countEl) {
+                    countEl.textContent = suggestions[idx] ? suggestions[idx].votes + ' votes' : '0 votes';
+                }
+                const btn = card.querySelector('.vote-btn');
+                if (btn) {
+                    btn.textContent = suggestions[idx] ? suggestions[idx].votes + ' votes' : '0 votes';
+                    btn.disabled = true;
+                    btn.className = 'vote-btn voted-btn';
+                }
+            });
+
+            const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
+            if (totalVotes >= groupSize) {
+                document.getElementById('votingStatus').textContent = 'Everyone voted! Ending early...';
+                setTimeout(endVoting, 1500);
+            }
+        }
+
+        function endVoting() {
+            clearInterval(timerInterval);
+            votingActive = false;
+
+            let maxVotes = -1;
+            let winnerIdx = -1;
+            for (let i = 0; i < suggestions.length; i++) {
+                if (suggestions[i].votes > maxVotes) {
+                    maxVotes = suggestions[i].votes;
+                    winnerIdx = i;
+                }
+            }
+
+            const tied = [];
+            for (let i = 0; i < suggestions.length; i++) {
+                if (suggestions[i].votes === maxVotes) tied.push(i);
+            }
+            if (tied.length > 1) {
+                let bestScore = -1;
+                for (let i of tied) {
+                    if (suggestions[i].score > bestScore) {
+                        bestScore = suggestions[i].score;
+                        winnerIdx = i;
+                    }
+                }
+            }
+
+            if (winnerIdx >= 0 && maxVotes > 0) {
+                const winner = suggestions[winnerIdx];
+                document.getElementById('votingStatus').textContent = 'Winner: Option ' + (winnerIdx + 1) + ' with ' +
+                    maxVotes + ' votes!';
+                document.getElementById('agentStatus').textContent = winner.view + ' · ' + winner.leg +
+                    ' — Selected by group vote!';
+
+                selectedSeats = winner.seats.slice();
+                currentSuggestionIdx = winnerIdx;
+
+                document.querySelectorAll('.rec-card').forEach(function(card, idx) {
+                    if (idx === winnerIdx) {
+                        card.classList.add('active');
+                        const badge = card.querySelector('.tag-sm');
+                        if (badge) badge.textContent = 'WINNER';
+                    }
+                    const btn = card.querySelector('.vote-btn');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.textContent = suggestions[idx].votes + ' votes';
+                    }
+                    const countEl = card.querySelector('.vote-count');
+                    if (countEl) {
+                        countEl.textContent = suggestions[idx].votes + ' votes';
+                    }
+                });
+
+                renderSeats();
+                updateStatus('Winner: Option ' + (winnerIdx + 1) + ' — ' + winner.view + ', ' + winner.leg +
+                    ' (' + maxVotes + ' votes)');
+            } else {
+                document.getElementById('votingStatus').textContent = 'No votes cast. Try again.';
+                document.getElementById('agentStatus').textContent = 'No votes. Click "Find Seats" to restart.';
+            }
+
+            sessionActive = false;
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            document.getElementById('timerDisplay').textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+            if (timeLeft < 30) {
+                document.getElementById('timerDisplay').style.color = '#dc2626';
+            } else {
+                document.getElementById('timerDisplay').style.color = '#92400e';
+            }
+        }
+
+        // Start session
+        function startSession(id) {
+            selectedMovieId = id;
+            selectedSeats = [];
+            suggestions = [];
+            currentSuggestionIdx = -1;
+            votes = {};
+            votingActive = false;
+            sessionActive = false;
+            hasVoted = false;
+            clearInterval(timerInterval);
+
+            shuffleSome();
+
+            document.getElementById('sessionSection').classList.remove('hidden');
+            document.getElementById('movieName').textContent = movies[id].title;
+            document.getElementById('recContainer').innerHTML = '';
+            document.getElementById('agentStatus').textContent = '';
+            document.getElementById('votingBar').classList.add('hidden');
+            document.getElementById('bookBtn').style.display = 'none';
+            document.getElementById('agentBookBtn').style.display = 'none';
+
+            renderSeats();
+            updateStatus('Session started. Click "Find Seats" to get options.');
+        }
+
+        // Find seats
+        document.getElementById('findBtn').addEventListener('click', function() {
+            groupSize = parseInt(document.getElementById('groupSize').value);
+            const blocks = findBestBlocks(groupSize);
+
+            if (blocks.length === 0) {
+                document.getElementById('agentStatus').textContent = 'No adjacent seats available. Try smaller group.';
+                updateStatus('No options found.');
+                return;
+            }
+
+            suggestions = blocks;
+            currentSuggestionIdx = -1;
+            selectedSeats = [];
+            votes = {};
+            for (let i = 0; i < suggestions.length; i++) {
+                suggestions[i].votes = 0;
+            }
+            hasVoted = false;
+            votingActive = false;
+            clearInterval(timerInterval);
+            document.getElementById('votingBar').classList.add('hidden');
+
+            const container = document.getElementById('recContainer');
+            container.innerHTML = '';
+
+            for (let i = 0; i < blocks.length; i++) {
+                const b = blocks[i];
+                const card = document.createElement('div');
+                card.className = 'rec-card';
+
+                const seatNums = b.seats.map(s => seatNumber(s)).join(', ');
+
+                let badgeHtml = '';
+                if (b.view === 'Center view' && b.leg === 'Extra legroom') badgeHtml =
+                    '<span class="tag-sm tag-best">Best</span>';
+                else if (b.leg === 'Extra legroom') badgeHtml = '<span class="tag-sm tag-legroom">Legroom</span>';
+                else if (b.view === 'Center view') badgeHtml = '<span class="tag-sm tag-best">Best View</span>';
+                else if (b.view === 'Good view' && b.leg === 'Good legroom') badgeHtml =
+                    '<span class="tag-sm tag-balanced">Balanced</span>';
+
+                card.innerHTML =
+                    '<div class="label">Option ' + (i + 1) + '</div>' +
+                    '<div class="desc">Seats ' + seatNums + '</div>' +
+                    '<div class="desc">' + b.view + ' · ' + b.leg + '</div>' +
+                    '<div class="vote-count">0 votes</div>' +
+                    '<button class="vote-btn">Vote</button>' +
+                    badgeHtml;
+
+                (function(idx) {
+                    card.onclick = function() {
+                        if (votingActive) {
+                            document.getElementById('agentStatus').textContent =
+                                'Voting in progress. Use the vote button.';
+                            return;
+                        }
+                        currentSuggestionIdx = idx;
+                        selectedSeats = [];
+                        document.querySelectorAll('.rec-card').forEach(el => el.classList.remove('active'));
+                        card.classList.add('active');
+                        const b2 = suggestions[idx];
+                        document.getElementById('agentStatus').textContent = 'Selected: Option ' + (idx + 1) +
+                            ' (seats ' + b2.seats.map(s => seatNumber(s)).join(', ') + ')';
+                        selectedSeats = b2.seats.slice();
+                        renderSeats();
+                        updateStatus('Selected: Option ' + (idx + 1) + ' — ' + b2.view + ', ' + b2.leg);
+                    };
+
+                    const voteBtn = card.querySelector('.vote-btn');
+                    if (voteBtn) {
+                        voteBtn.onclick = function(e) {
+                            e.stopPropagation();
+                            if (!votingActive) {
+                                document.getElementById('agentStatus').textContent =
+                                    'Voting not active. Click "Find Seats" then vote.';
+                                return;
+                            }
+                            castVote(idx);
+                        };
+                    }
+                })(i);
+
+                container.appendChild(card);
+            }
+
+            // Start voting automatically
+            setTimeout(startVoting, 500);
+            document.getElementById('agentStatus').textContent = 'Voting starting...';
+            updateStatus('Found ' + blocks.length + ' options. Voting begins now.');
+        });
+
+        // End voting early
+        document.getElementById('endVotingBtn').addEventListener('click', function() {
+            if (votingActive) {
+                endVoting();
+                document.getElementById('votingStatus').textContent = 'Voting ended early by coordinator.';
+                document.getElementById('agentStatus').textContent = 'Voting ended early.';
+            }
+        });
+
+        // Manual booking - each person pays for their own seat
+        document.getElementById('bookBtn').addEventListener('click', function() {
+            if (selectedSeats.length === 0) return;
+            const nums = selectedSeats.map(s => seatNumber(s));
+            const userSeat = nums[0]; // Each person pays for their own seat
+            nums.forEach(n => { available[n - 1] = false; });
+            selectedSeats = [];
+            suggestions = [];
+            currentSuggestionIdx = -1;
+            document.getElementById('recContainer').innerHTML = '';
+            document.getElementById('votingBar').classList.add('hidden');
+            renderSeats();
+            document.getElementById('agentStatus').textContent = 'Paid for seat ' + userSeat + '.';
+            updateStatus('You paid for seat ' + userSeat + '. Group booking confirmed.');
+        });
+
+        // Agent books all (Stranger In The Middle books everyone)
+        document.getElementById('agentBookBtn').addEventListener('click', function() {
+            if (selectedSeats.length === 0) return;
+            const nums = selectedSeats.map(s => seatNumber(s));
+            let stillFree = true;
+            nums.forEach(n => { if (!available[n - 1]) stillFree = false; });
+            if (!stillFree) {
+                document.getElementById('agentStatus').textContent = 'Some seats taken by others! Booking failed.';
+                updateStatus('Booking failed — seats taken.');
+                selectedSeats = [];
+                renderSeats();
+                return;
+            }
+            const result = bookTickets(selectedMovieId, nums);
+            if (result.success) {
+                selectedSeats = [];
+                suggestions = [];
+                currentSuggestionIdx = -1;
+                document.getElementById('recContainer').innerHTML = '';
+                document.getElementById('votingBar').classList.add('hidden');
+                renderSeats();
+                document.getElementById('agentStatus').textContent = 'Stranger In The Middle booked all seats!';
+                updateStatus('Stranger booked seats ' + nums.join(', ') + ' for everyone.');
+            } else {
+                document.getElementById('agentStatus').textContent = 'Booking failed: ' + result.error;
+                updateStatus('Stranger booking failed.');
+            }
+        });
+
+        // Reset
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            clearInterval(timerInterval);
+            votingActive = false;
+            sessionActive = false;
+            selectedSeats = [];
+            suggestions = [];
+            currentSuggestionIdx = -1;
+            votes = {};
+            document.getElementById('recContainer').innerHTML = '';
+            document.getElementById('votingBar').classList.add('hidden');
+            document.getElementById('bookBtn').style.display = 'none';
+            document.getElementById('agentBookBtn').style.display = 'none';
+            document.getElementById('agentStatus').textContent = '';
+            shuffleSome();
+            renderSeats();
+            updateStatus('Session reset. Click "Find Seats" to start again.');
+        });
+
+        // WebMCP
+        const ctx = navigator.modelContext;
+
+        function bookTickets(movieId, seats) {
+            const indices = seats.map(n => n - 1);
+            let allFree = true;
+            indices.forEach(i => { if (i < 0 || i >= available.length || !available[i]) allFree = false; });
+            if (!allFree) return { success: false, error: 'Seats taken.' };
+            indices.forEach(i => { available[i] = false; });
+            return { success: true };
+        }
+
+        if (ctx) {
+            ctx.registerTool({
+                name: 'search_movies',
+                description: 'List available movies.',
+                inputSchema: { type: 'object', properties: {} },
+                execute: async () => {
+                    const list = Object.keys(movies).map(id =>
+                        movies[id].title + ' at ' + movies[id].time + ' — ID: ' + id
+                    );
+                    return { content: [{ type: 'text', text: list.join('\n') }] };
+                }
+            });
+
+            ctx.registerTool({
+                name: 'get_available_seats',
+                description: 'Show free seats for a movie.',
+                inputSchema: { type: 'object', properties: { movieId: { type: 'string' } }, required: ['movieId'] },
+                execute: async (input) => {
+                    if (!movies[input.movieId]) return { content: [{ type: 'text', text: 'Movie not found.' }],
+                        isError: true };
+                    const free = available.map((a, i) => a ? i + 1 : null).filter(v => v !== null);
+                    return { content: [{ type: 'text', text: 'Available: ' + free.join(', ') }] };
+                }
+            });
+
+            ctx.registerTool({
+                name: 'book_tickets',
+                description: 'Book seats for a movie.',
+                inputSchema: {
+                    type: 'object',
+                    properties: { movieId: { type: 'string' }, seats: { type: 'array', items: { type: 'integer' } } },
+                    required: ['movieId', 'seats']
+                },
+                execute: async (input) => {
+                    if (!movies[input.movieId]) return { content: [{ type: 'text', text: 'Movie not found.' }],
+                        isError: true };
+                    const result = bookTickets(input.movieId, input.seats);
+                    if (!result.success) return { content: [{ type: 'text', text: 'Error: ' + result.error }],
+                        isError: true };
+                    renderSeats();
+                    document.getElementById('bookBtn').style.display = 'none';
+                    document.getElementById('agentBookBtn').style.display = 'none';
+                    return { content: [{ type: 'text', text: 'Booked seats ' + input.seats.join(', ') }] };
+                }
+            });
+
+            ctx.registerTool({
+                name: 'stranger_vote',
+                description: 'Stranger In The Middle coordinates group voting for seats.',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        movieId: { type: 'string' },
+                        groupSize: { type: 'integer' },
+                        voteOption: { type: 'integer' }
+                    },
+                    required: ['movieId']
+                },
+                execute: async (input) => {
+                    if (!movies[input.movieId]) return { content: [{ type: 'text', text: 'Movie not found.' }],
+                        isError: true };
+                    const gs = input.groupSize || 4;
+                    const blocks = findBestBlocks(gs);
+                    if (blocks.length === 0) return { content: [{ type: 'text', text: 'No adjacent seats.' }] };
+                    let out = 'Stranger In The Middle found these options:\n';
+                    for (let i = 0; i < blocks.length; i++) {
+                        const b = blocks[i];
+                        out += (i + 1) + '. Seats ' + b.seats.map(s => s + 1).join(',') +
+                            ' | ' + b.view + ' | ' + b.leg + '\n';
+                    }
+                    out += '\nEach person votes. Highest votes wins. Each pays for their own seat.';
+                    return { content: [{ type: 'text', text: out }] };
+                }
+            });
+
+            updateStatus('WebMCP ready! Stranger In The Middle is active.');
+        } else {
+            updateStatus('WebMCP not available — use Chrome with flag or ChatGPT browser.');
+        }
+
+        // Expose
+        window.startSession = startSession;
+        window.renderSeats = renderSeats;
+        window.bookTickets = bookTickets;
+    </script>
+
+</body>
+</html>
