@@ -29,6 +29,15 @@ router.get(
 );
 
 /**
+ * @route   GET /session
+ * @desc    Redirect a room-code form submission to its session page
+ */
+router.get('/session', (req, res) => {
+  const sessionId = typeof req.query.id === 'string' ? req.query.id.trim() : '';
+  res.redirect(sessionId ? `/session/${encodeURIComponent(sessionId)}` : '/#movie-catalog');
+});
+
+/**
  * @route   GET /movies/:id
  * @desc    Render individual movie showcase & instant SITM session launcher
  */
