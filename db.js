@@ -95,7 +95,7 @@ export const INITIAL_MOVIES = {
     genre: ['Action', 'Comedy', 'Superhero'],
     director: 'Shawn Levy',
     cast: ['Ryan Reynolds', 'Hugh Jackman', 'Emma Corrin', 'Matthew Macfadyen'],
-    poster: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80',
+    poster: 'https://static1.cbrimages.com/wordpress/wp-content/uploads/2024/10/deadpool-and-wolverine-20th-century.jpg',
     backdrop: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80',
     description: 'A listless Wade Wilson is pulled out of civilian retirement by the TVA to save his timeline with a very reluctant Wolverine.',
     highlight: 'Ultra-plush leather electric recliners with personal snack tables.',
