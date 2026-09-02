@@ -1,5 +1,5 @@
 <%# Cinema Curved Screen and Interactive Seat Matrix Component %>
-<div class="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800/80 shadow-2xl relative overflow-hidden">
+<div class="glass-panel rounded-3xl p-4 sm:p-8 border border-slate-800/80 shadow-2xl relative overflow-hidden min-w-0">
   
   <!-- Ambient Theater Lighting Spotlight -->
   <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-linear-to-b from-blue-500/10 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none"></div>
@@ -16,8 +16,8 @@
   </div>
 
   <!-- Seat Matrix Container -->
-  <div class="relative max-w-lg mx-auto">
-    <div id="seatGrid" class="grid grid-cols-9 gap-2 sm:gap-2.5 items-center select-none">
+  <div class="relative w-full max-w-lg mx-auto">
+    <div id="seatGrid" class="grid grid-cols-9 gap-1.5 sm:gap-2.5 items-center select-none">
       <!-- Generated via JS renderSeats() -->
     </div>
   </div>

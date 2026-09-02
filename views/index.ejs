@@ -584,6 +584,8 @@
                 const sessionJson = await sessionRes.json();
                 if (sessionJson.data && sessionJson.data.session) {
                     currentSessionId = sessionJson.data.session.id;
+                    window.location.href = '/session/' + encodeURIComponent(currentSessionId);
+                    return;
                 }
             } catch (e) {
                 currentSessionId = 'session_' + Math.random().toString(36).substr(2, 6);

@@ -2,7 +2,7 @@
 <div class="space-y-6">
 
   <!-- Voting Status Bar & Countdown Timer -->
-  <div id="votingBar" class="glass-panel rounded-2xl p-5 border border-amber-500/30 bg-gradient-to-r from-amber-950/20 via-slate-900/60 to-amber-950/20 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+  <div id="votingBar" class="hidden glass-panel rounded-2xl p-5 border border-amber-500/30 bg-linear-to-r from-amber-950/20 via-slate-900/60 to-amber-950/20 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
         <svg class="w-5 h-5 animate-spin" style="animation-duration: 4s;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -17,7 +17,7 @@
 
     <!-- Timer & End Button -->
     <div class="flex items-center gap-3">
-      <div class="px-4 py-2 rounded-xl bg-black/60 border border-amber-500/40 text-center min-w-[90px]">
+      <div class="px-4 py-2 rounded-xl bg-black/60 border border-amber-500/40 text-center min-w-22.5">
         <span class="text-[10px] uppercase font-bold text-slate-400 block leading-none mb-1">Time Left</span>
         <span id="timerDisplay" class="font-mono text-xl sm:text-2xl font-black text-amber-400 tracking-wider">02:00</span>
       </div>
@@ -44,7 +44,7 @@
       <span class="text-xs text-slate-500 font-medium">Click a card to preview on screen</span>
     </div>
 
-    <div id="recContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div id="recContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
       <!-- Generated via JS renderRecommendations() -->
     </div>
   </div>

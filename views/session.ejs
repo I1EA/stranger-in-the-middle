@@ -1,19 +1,23 @@
 <%- include('partials/header', { title }) %>
 <%- include('partials/navbar') %>
 
-<main class="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
-  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+<main class="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
     <div>
       <p class="text-xs font-bold uppercase tracking-widest text-red-400">SITM Arena</p>
-      <h1 class="mt-2 text-3xl sm:text-4xl font-black text-white"><%= session.movie.title %></h1>
-      <p class="mt-2 text-slate-400">Room <span class="font-mono text-slate-200"><%= sessionId %></span> &middot; Group of <%= session.groupSize %></p>
+      <h1 class="mt-2 text-2xl sm:text-4xl font-black text-white wrap-break-word"><%= session.movie.title %></h1>
+      <p class="mt-2 text-sm text-slate-400">Room <span class="font-mono text-slate-200"><%= sessionId %></span> &middot; Group of <%= session.groupSize %></p>
     </div>
     <a href="/" class="inline-flex w-fit rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-red-500 hover:text-white">Browse movies</a>
   </div>
 
-  <div class="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
+  <div class="grid min-w-0 lg:grid-cols-[1.2fr_0.8fr] gap-4 sm:gap-6">
     <%- include('partials/seat-matrix') %>
     <div class="space-y-6">
+      <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+        <span id="agentStatus" class="min-w-0 text-xs sm:text-sm text-emerald-400 wrap-break-word">AI options ready. Select a block.</span>
+        <button id="startVoteBtn" type="button" class="shrink-0 rounded-xl bg-amber-500 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-amber-400">Start group vote</button>
+      </div>
       <%- include('partials/voting-arena') %>
       <%- include('partials/ai-terminal') %>
     </div>
@@ -21,3 +25,157 @@
 </main>
 
 <%- include('partials/footer') %>
+
+<script>
+  const sessionId = <%- JSON.stringify(sessionId) %>;
+  const sessionSuggestions = <%- JSON.stringify(session.suggestions || []) %>;
+  const availableSeats = <%- JSON.stringify(session.available || []) %>;
+  let suggestions = sessionSuggestions.map((option) => ({ ...option, votes: 0 }));
+  let selectedSeats = [];
+  let votingActive = false;
+  let hasVoted = false;
+  let timerInterval;
+  let timeLeft = 120;
+
+  const seatLabel = (index) => {
+    const row = Math.floor(index / 8);
+    return String.fromCharCode(65 + row) + (index % 8 + 1);
+  };
+
+  function selectOption(index) {
+    if (votingActive) return;
+    selectedSeats = suggestions[index].seats.slice();
+    document.querySelectorAll('.rec-card').forEach((card, cardIndex) => {
+      card.classList.toggle('active', cardIndex === index);
+    });
+    document.getElementById('agentStatus').textContent = 'Selected: Option ' + (index + 1) + ' (seats ' + selectedSeats.map(seatLabel).join(', ') + ')';
+    renderSeats();
+  }
+
+  function renderRecommendations() {
+    const container = document.getElementById('recContainer');
+    container.innerHTML = '';
+    suggestions.forEach((option, index) => {
+      const card = document.createElement('div');
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.className = 'rec-card text-left border border-slate-700 rounded-xl p-4 space-y-2';
+      card.innerHTML = '<div class="label">Option ' + (index + 1) + '</div>' +
+        '<div class="desc">Seats ' + option.seats.map(seatLabel).join(', ') + '</div>' +
+        '<div class="desc">' + option.view + ' · ' + option.leg + '</div>' +
+        '<div class="vote-count">0 votes</div>' +
+        '<div class="flex gap-2 pt-2">' +
+        '<button type="button" class="select-btn rounded-lg border border-slate-600 px-3 py-1.5 text-xs font-bold text-slate-200 hover:border-emerald-400 hover:text-white">Select</button>' +
+        '<button type="button" class="vote-btn rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50" disabled>Vote</button>' +
+        '</div>';
+      card.addEventListener('click', () => selectOption(index));
+      card.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          selectOption(index);
+        }
+      });
+      card.querySelector('.select-btn').addEventListener('click', (event) => {
+        event.stopPropagation();
+        selectOption(index);
+      });
+      card.querySelector('.vote-btn').addEventListener('click', (event) => {
+        event.stopPropagation();
+        castVote(index);
+      });
+      container.appendChild(card);
+    });
+  }
+
+  function renderSeats() {
+    const grid = document.getElementById('seatGrid');
+    if (!grid.children.length) {
+      for (let row = 0; row < 6; row += 1) {
+        const label = document.createElement('div');
+        label.className = 'text-center text-xs font-bold text-slate-500';
+        label.textContent = String.fromCharCode(65 + row);
+        grid.appendChild(label);
+        for (let column = 0; column < 8; column += 1) {
+          const index = row * 8 + column;
+          const seat = document.createElement('button');
+          seat.type = 'button';
+          seat.className = 'cinema-seat aspect-square min-w-0 flex items-center justify-center text-[10px] sm:text-xs font-bold';
+          seat.textContent = column + 1;
+          seat.disabled = !availableSeats[index];
+          grid.appendChild(seat);
+        }
+      }
+    }
+    grid.querySelectorAll('.cinema-seat').forEach((seat, seatIndex) => {
+      const index = Math.floor(seatIndex / 8) * 8 + (seatIndex % 8);
+      seat.classList.toggle('seat-selected', selectedSeats.includes(index));
+      seat.classList.toggle('seat-avail', availableSeats[index] && !selectedSeats.includes(index));
+      seat.classList.toggle('seat-taken', !availableSeats[index]);
+    });
+  }
+
+  async function castVote(index) {
+    if (!votingActive || hasVoted) return;
+    hasVoted = true;
+    suggestions[index].votes += 1;
+    document.querySelectorAll('.rec-card').forEach((card, cardIndex) => {
+      card.querySelector('.vote-count').textContent = suggestions[cardIndex].votes + ' votes';
+      const button = card.querySelector('.vote-btn');
+      button.disabled = true;
+      button.textContent = suggestions[cardIndex].votes + ' votes';
+    });
+    document.getElementById('votingStatus').textContent = 'You voted! Waiting for others...';
+    await fetch('/api/sessions/' + encodeURIComponent(sessionId) + '/vote', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ optionIndex: index, voterName: 'Group Member' })
+    }).catch(() => {});
+  }
+
+  function updateTimer() {
+    document.getElementById('timerDisplay').textContent = Math.floor(timeLeft / 60) + ':' + String(timeLeft % 60).padStart(2, '0');
+  }
+
+  async function startVoting() {
+    if (suggestions.length < 2) return;
+    votingActive = true;
+    hasVoted = false;
+    suggestions.forEach((option) => { option.votes = 0; });
+    document.getElementById('votingBar').classList.remove('hidden');
+    document.getElementById('startVoteBtn').classList.add('hidden');
+    document.getElementById('agentStatus').textContent = 'Voting open! Choose your option.';
+    document.querySelectorAll('.vote-btn').forEach((button) => { button.disabled = false; button.textContent = 'Vote'; });
+    timeLeft = 120;
+    updateTimer();
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft -= 1;
+      updateTimer();
+      if (timeLeft <= 0) endVoting();
+    }, 1000);
+    await fetch('/api/sessions/' + encodeURIComponent(sessionId) + '/start-voting', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ durationSeconds: 120 })
+    }).catch(() => {});
+  }
+
+  async function endVoting() {
+    if (!votingActive) return;
+    votingActive = false;
+    clearInterval(timerInterval);
+    const winnerIndex = suggestions.reduce((best, option, index) => option.votes > suggestions[best].votes ? index : best, 0);
+    if (suggestions[winnerIndex].votes > 0) {
+      selectOption(winnerIndex);
+      document.getElementById('votingStatus').textContent = 'Winner: Option ' + (winnerIndex + 1);
+      document.getElementById('agentStatus').textContent = 'Option ' + (winnerIndex + 1) + ' selected by group vote.';
+    } else {
+      document.getElementById('votingStatus').textContent = 'No votes cast. Select an option to continue.';
+    }
+    document.querySelectorAll('.vote-btn').forEach((button) => { button.disabled = true; });
+    await fetch('/api/sessions/' + encodeURIComponent(sessionId) + '/end-voting', { method: 'POST' }).catch(() => {});
+  }
+
+  document.getElementById('startVoteBtn')?.addEventListener('click', startVoting);
+  document.getElementById('endVotingBtn')?.addEventListener('click', endVoting);
+  renderSeats();
+  renderRecommendations();
+</script>
