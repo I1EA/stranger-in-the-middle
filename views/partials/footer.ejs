@@ -194,7 +194,9 @@
           body: JSON.stringify({ movieId: 'spiderman', groupSize: 4 })
         });
         const data = await res.json();
-        consoleEl.textContent = 'SITM AI Optimizer computed:\n' + JSON.stringify(data.data.session.suggestions, null, 2);
+        const createdSession = data.data.session;
+        consoleEl.textContent = 'SITM AI Optimizer computed:\n' + JSON.stringify(createdSession.suggestions, null, 2) + '\n\nOpening the voting room...';
+        window.location.href = '/session/' + encodeURIComponent(createdSession.id);
       } else if (toolName === 'book_tickets') {
         const sessionRes = await fetch('/api/sessions', {
           method: 'POST',

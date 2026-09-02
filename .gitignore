@@ -32,7 +32,7 @@ Thumbs.db
 # Build
 dist/
 build/
-public/src/output.css
+public/*.css.map
 public/src/*.css.map
 
 # Testing

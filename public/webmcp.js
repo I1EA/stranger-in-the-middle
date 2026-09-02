@@ -85,6 +85,9 @@
             body: JSON.stringify({ movieId, groupSize }),
           });
           const session = data.data.session;
+          if (window.location.pathname === '/' && session.id) {
+            window.location.href = '/session/' + encodeURIComponent(session.id);
+          }
           return {
             content: [{
               type: 'text',
