@@ -1,0 +1,156 @@
+<footer class="mt-auto border-t border-slate-800/80 bg-[#06060c] text-slate-400 text-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      
+      <!-- Brand & Mission -->
+      <div class="md:col-span-2 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-red-600 flex items-center justify-center text-white font-black text-sm">
+            SITM
+          </div>
+          <span class="text-lg font-extrabold tracking-tight text-white">Stranger In The Middle</span>
+        </div>
+        <p class="text-slate-400 text-sm leading-relaxed max-w-md">
+          The AI-coordinated group cinema seat voting & booking platform. Solves the fragmented booking dilemma by coordinating group votes and locking adjacent contiguous blocks in one single atomic checkout.
+        </p>
+        <div class="flex items-center gap-2 text-xs text-slate-500">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>WebMCP Ready · Express 5 · EJS · Tailwind CSS · Pure In-Memory Atomic Transactions</span>
+        </div>
+      </div>
+
+      <!-- WebMCP Tools Summary -->
+      <div>
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+          WebMCP Tools
+        </h4>
+        <ul class="space-y-2 text-xs">
+          <li><code class="px-1.5 py-0.5 rounded bg-slate-800/80 text-emerald-400 font-mono">search_movies</code> - Browse films</li>
+          <li><code class="px-1.5 py-0.5 rounded bg-slate-800/80 text-emerald-400 font-mono">get_available_seats</code> - Query seat map</li>
+          <li><code class="px-1.5 py-0.5 rounded bg-slate-800/80 text-emerald-400 font-mono">stranger_vote</code> - AI coordination</li>
+          <li><code class="px-1.5 py-0.5 rounded bg-slate-800/80 text-emerald-400 font-mono">book_tickets</code> - Atomic group checkout</li>
+        </ul>
+      </div>
+
+      <!-- Quick Navigation -->
+      <div>
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Cinema Hub</h4>
+        <ul class="space-y-2 text-xs">
+          <li><a href="/" class="hover:text-red-400 transition-colors">Showtimes & Catalogs</a></li>
+          <li><a href="/#how-it-works" class="hover:text-red-400 transition-colors">Group Voting Algorithm</a></li>
+          <li><a href="/bookings" class="hover:text-red-400 transition-colors">My Cinema Tickets</a></li>
+          <li><a href="/api/health" target="_blank" class="hover:text-red-400 transition-colors">System Health API</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="pt-8 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <p>© <%= new Date().getFullYear() %> Stranger In The Middle (SITM). MIT License.</p>
+      <div class="flex items-center gap-4">
+        <span>Dolby Cinema · IMAX 70mm · Laser 4K</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- WebMCP Interactive Tool Inspector Drawer -->
+<div id="mcpDrawer" class="fixed inset-y-0 right-0 w-full sm:w-96 bg-[#0c0c1a] border-l border-slate-800 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+  <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      <h3 class="font-bold text-white text-sm">WebMCP AI Tool Terminal</h3>
+    </div>
+    <button onclick="toggleMcpDrawer()" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+  
+  <div class="p-4 flex-1 overflow-y-auto space-y-4 text-xs">
+    <p class="text-slate-400">
+      This app exposes native tools to AI agents using the <strong>WebMCP Polyfill</strong>. You can trigger these tools directly below:
+    </p>
+
+    <div class="space-y-3">
+      <!-- Tool 1 -->
+      <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="font-mono font-bold text-emerald-400">search_movies()</span>
+          <button onclick="testMcpTool('search_movies')" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
+        </div>
+        <p class="text-slate-400 text-[11px]">Returns list of available movies, venues, and prices.</p>
+      </div>
+
+      <!-- Tool 2 -->
+      <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="font-mono font-bold text-emerald-400">get_available_seats()</span>
+          <button onclick="testMcpTool('get_available_seats', { movieId: 'spiderman' })" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
+        </div>
+        <p class="text-slate-400 text-[11px]">Queries available seats for Spider-Man.</p>
+      </div>
+
+      <!-- Tool 3 -->
+      <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="font-mono font-bold text-emerald-400">stranger_vote()</span>
+          <button onclick="testMcpTool('stranger_vote', { movieId: 'spiderman', groupSize: 4 })" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
+        </div>
+        <p class="text-slate-400 text-[11px]">Computes optimal contiguous blocks for 4 friends.</p>
+      </div>
+    </div>
+
+    <div>
+      <h4 class="font-bold text-slate-300 text-xs mb-1.5">Tool Output Console</h4>
+      <pre id="mcpConsole" class="p-3 rounded-xl bg-black/80 border border-slate-800 font-mono text-[11px] text-emerald-300 overflow-x-auto h-48 whitespace-pre-wrap">WebMCP Ready. Click 'Run' on any tool above to execute.</pre>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleMcpDrawer() {
+    const drawer = document.getElementById('mcpDrawer');
+    drawer.classList.toggle('translate-x-full');
+  }
+
+  async function testMcpTool(toolName, input = {}) {
+    const consoleEl = document.getElementById('mcpConsole');
+    consoleEl.textContent = 'Executing tool: ' + toolName + '...\n';
+    try {
+      if (window.navigator?.modelContext) {
+        // Try direct WebMCP tool call
+        const ctx = window.navigator.modelContext;
+        consoleEl.textContent = 'Calling navigator.modelContext with tool: ' + toolName + '...\n';
+      }
+      
+      // Execute matching API query for interactive demo
+      if (toolName === 'search_movies') {
+        const res = await fetch('/api/movies');
+        const data = await res.json();
+        consoleEl.textContent = JSON.stringify(data, null, 2);
+      } else if (toolName === 'get_available_seats') {
+        const res = await fetch('/api/movies/spiderman/seats');
+        const data = await res.json();
+        consoleEl.textContent = JSON.stringify(data, null, 2);
+      } else if (toolName === 'stranger_vote') {
+        const res = await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ movieId: 'spiderman', groupSize: 4 })
+        });
+        const data = await res.json();
+        consoleEl.textContent = 'SITM AI Optimizer computed:\n' + JSON.stringify(data.data.session.suggestions, null, 2);
+      }
+    } catch (err) {
+      consoleEl.textContent = 'Error: ' + err.message;
+    }
+  }
+</script>
+</body>
+</html>

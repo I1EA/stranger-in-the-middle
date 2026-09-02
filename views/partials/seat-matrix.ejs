@@ -1,0 +1,54 @@
+<%# Cinema Curved Screen and Interactive Seat Matrix Component %>
+<div class="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800/80 shadow-2xl relative overflow-hidden">
+  
+  <!-- Ambient Theater Lighting Spotlight -->
+  <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-linear-to-b from-blue-500/10 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Cinema Curved Screen -->
+  <div class="relative max-w-xl mx-auto mb-10 text-center">
+    <div class="h-2.5 w-full bg-linear-to-r from-slate-700 via-white/80 to-slate-700 rounded-full shadow-[0_0_25px_rgba(255,255,255,0.4)] screen-glow mb-2"></div>
+    <div class="flex items-center justify-center gap-2 text-[11px] font-bold tracking-[0.3em] uppercase text-slate-400">
+      <svg class="w-3.5 h-3.5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+      </svg>
+      <span>IMAX / Dolby Laser Screen</span>
+    </div>
+  </div>
+
+  <!-- Seat Matrix Container -->
+  <div class="relative max-w-lg mx-auto">
+    <div id="seatGrid" class="grid grid-cols-9 gap-2 sm:gap-2.5 items-center select-none">
+      <!-- Generated via JS renderSeats() -->
+    </div>
+  </div>
+
+  <!-- Live Hover Tooltip -->
+  <div id="seatTooltip" class="mt-6 text-center text-xs text-slate-400 h-6 transition-all duration-200 font-medium">
+    Hover or tap any recliner seat to preview details
+  </div>
+
+  <!-- Legend -->
+  <div class="mt-6 pt-6 border-t border-slate-800/80 flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-xs text-slate-400">
+    <div class="flex items-center gap-2">
+      <div class="w-4 h-4 rounded bg-slate-800 border border-slate-700"></div>
+      <span>Available</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="w-4 h-4 rounded bg-emerald-500 border border-emerald-400 shadow-sm shadow-emerald-500/50"></div>
+      <span>Your Selection</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="w-4 h-4 rounded bg-amber-500 border border-amber-400 shadow-sm shadow-amber-500/50"></div>
+      <span>Winning Block</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="w-4 h-4 rounded bg-blue-600 border border-blue-400 shadow-sm shadow-blue-500/50"></div>
+      <span>AI Suggested</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="w-4 h-4 rounded bg-stone-900 border border-stone-800 opacity-50"></div>
+      <span>Occupied</span>
+    </div>
+  </div>
+
+</div>

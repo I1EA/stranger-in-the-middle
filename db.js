@@ -9,60 +9,118 @@ export const TOTAL_SEATS = ROWS * COLS;
 export const ROW_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 /**
- * Pre-seeded Movies Catalog
+ * Pre-seeded Movies Catalog with Rich Cinema Metadata
  */
 export const INITIAL_MOVIES = {
   spiderman: {
     id: 'spiderman',
     title: 'Spider-Man: Beyond the Spider-Verse',
     time: '7:00 PM',
+    showtimes: ['5:15 PM', '7:00 PM', '9:45 PM'],
     venue: 'Odeon Luxe Leicester Square',
     screen: 'Screen 1 · Dolby Cinema',
     duration: '2h 20min',
     rating: 'PG-13',
+    imdbRating: '8.9',
     ticketPrice: 18.50,
     badge: 'SELLING FAST',
-    badgeColor: '#cc0000',
-    description: 'The definitive multiverse finale. Experience unmatched visuals and Dolby Atmos sound.',
+    badgeColor: '#dc2626',
+    format: 'Dolby Cinema & Atmos',
+    genre: ['Action', 'Animation', 'Sci-Fi'],
+    director: 'Joaquim Dos Santos, Kemp Powers',
+    cast: ['Shameik Moore', 'Hailee Steinfeld', 'Oscar Isaac', 'Daniel Kaluuya'],
+    poster: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?auto=format&fit=crop&w=600&q=80',
+    backdrop: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=80',
+    description: 'Miles Morales traverses the multiverse in a heart-pounding race against fate alongside Gwen Stacy and the Spider-Society.',
+    highlight: 'Experience unmatched contrast and Dolby Atmos 360° object-based surround sound.',
   },
   dune2: {
     id: 'dune2',
     title: 'Dune: Part Two (IMAX 70mm)',
     time: '8:30 PM',
+    showtimes: ['4:30 PM', '8:30 PM', '11:15 PM'],
     venue: 'BFI IMAX Waterloo',
-    screen: 'Grand IMAX Screen',
+    screen: 'Grand IMAX Screen · 1.43:1',
     duration: '2h 46min',
     rating: 'PG-13',
+    imdbRating: '8.6',
     ticketPrice: 24.00,
     badge: 'POPULAR',
     badgeColor: '#d97706',
-    description: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators.',
+    format: 'IMAX 70mm Large Format',
+    genre: ['Sci-Fi', 'Adventure', 'Action'],
+    director: 'Denis Villeneuve',
+    cast: ['Timothée Chalamet', 'Zendaya', 'Rebecca Ferguson', 'Austin Butler'],
+    poster: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
+    backdrop: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    description: 'Paul Atreides unites with Chani and the Fremen on a warpath of revenge against the conspirators who destroyed his family.',
+    highlight: 'Specially shot with IMAX cameras to expand up to 40% more picture.',
   },
   oppenheimer: {
     id: 'oppenheimer',
     title: 'Oppenheimer (70mm Exclusive)',
     time: '6:15 PM',
+    showtimes: ['2:45 PM', '6:15 PM', '9:30 PM'],
     venue: 'Science Museum IMAX',
     screen: 'Ronson Theatre',
     duration: '3h 00min',
     rating: 'R',
+    imdbRating: '8.9',
     ticketPrice: 20.00,
     badge: 'LIMITED',
     badgeColor: '#7c3aed',
-    description: 'Christopher Nolan’s epic historical drama captured on stunning large-format 70mm film.',
+    format: '70mm Reel Projection',
+    genre: ['Biography', 'Drama', 'History'],
+    director: 'Christopher Nolan',
+    cast: ['Cillian Murphy', 'Emily Blunt', 'Matt Damon', 'Robert Downey Jr.'],
+    poster: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=600&q=80',
+    backdrop: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80',
+    description: 'The pulse-pounding story of J. Robert Oppenheimer and the Manhattan Project that ushered in the atomic age.',
+    highlight: 'Captured in large-format 65mm & IMAX black-and-white analog photography.',
   },
   deadpool: {
     id: 'deadpool',
     title: 'Deadpool & Wolverine',
     time: '9:15 PM',
+    showtimes: ['4:00 PM', '6:45 PM', '9:15 PM'],
     venue: 'Vue Cinema West End',
     screen: 'Screen 3 · Recliner Luxe',
     duration: '2h 08min',
     rating: 'R',
+    imdbRating: '7.8',
     ticketPrice: 16.50,
     badge: 'TRENDING',
-    badgeColor: '#dc2626',
-    description: 'A listless Wade Wilson toils in civilian life before teaming up with a reluctant Wolverine.',
+    badgeColor: '#e11d48',
+    format: '4K Laser & Recliner',
+    genre: ['Action', 'Comedy', 'Superhero'],
+    director: 'Shawn Levy',
+    cast: ['Ryan Reynolds', 'Hugh Jackman', 'Emma Corrin', 'Matthew Macfadyen'],
+    poster: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80',
+    backdrop: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80',
+    description: 'A listless Wade Wilson is pulled out of civilian retirement by the TVA to save his timeline with a very reluctant Wolverine.',
+    highlight: 'Ultra-plush leather electric recliners with personal snack tables.',
+  },
+  interstellar: {
+    id: 'interstellar',
+    title: 'Interstellar (10th Anniversary IMAX)',
+    time: '7:45 PM',
+    showtimes: ['3:30 PM', '7:45 PM'],
+    venue: 'Odeon IMAX Victoria',
+    screen: 'Auditorium A · IMAX 4K Dual Laser',
+    duration: '2h 49min',
+    rating: 'PG-13',
+    imdbRating: '8.7',
+    ticketPrice: 22.00,
+    badge: 'ANNIVERSARY',
+    badgeColor: '#2563eb',
+    format: 'IMAX Dual Laser 12-Track',
+    genre: ['Sci-Fi', 'Adventure', 'Drama'],
+    director: 'Christopher Nolan',
+    cast: ['Matthew McConaughey', 'Anne Hathaway', 'Jessica Chastain', 'Michael Caine'],
+    poster: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=600&q=80',
+    backdrop: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80',
+    description: 'A team of explorers travel through a newly discovered wormhole in space to ensure humanity’s survival.',
+    highlight: 'Remastered in 4K Dual Laser with Hans Zimmer’s thunderous pipe organ score.',
   },
 };
 
@@ -214,7 +272,7 @@ export function findBestBlocks(availableGrid, groupSize = 4) {
 }
 
 /**
- * In-Memory Database Store (with multi-movie and session management)
+ * In-Memory Database Store
  */
 class SITMDatabase {
   constructor() {
@@ -230,10 +288,21 @@ class SITMDatabase {
   }
 
   /**
-   * Get all movies
+   * Get all movies with optional filter
    */
-  getAllMovies() {
-    return Object.values(this.movies);
+  getAllMovies({ search = '', genre = '', format = '' } = {}) {
+    let list = Object.values(this.movies);
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter((m) => m.title.toLowerCase().includes(q) || m.venue.toLowerCase().includes(q));
+    }
+    if (genre) {
+      list = list.filter((m) => m.genre && m.genre.some((g) => g.toLowerCase() === genre.toLowerCase()));
+    }
+    if (format) {
+      list = list.filter((m) => m.format && m.format.toLowerCase().includes(format.toLowerCase()));
+    }
+    return list;
   }
 
   /**
@@ -274,8 +343,8 @@ class SITMDatabase {
       organizerName,
       available: [...available],
       suggestions,
-      votes: {}, // { voterId: optionIndex }
-      voteCounts: [0, 0, 0],
+      votes: {}, // { voterId: { optionIndex, voterName, votedAt } }
+      voteCounts: suggestions.map(() => 0),
       status: 'ready', // 'ready' | 'voting' | 'ended' | 'booked'
       winnerOptionIndex: null,
       winningSeats: [],
@@ -428,7 +497,7 @@ class SITMDatabase {
   /**
    * Book tickets (either full group booking or individual payment)
    */
-  bookSeats(sessionId, { seatIndices, bookedBy = 'Stranger In The Middle', paymentMethod = 'card' } = {}) {
+  bookSeats(sessionId, { seatIndices, bookedBy = 'Stranger In The Middle Agent', paymentMethod = 'card' } = {}) {
     const session = this.getSession(sessionId);
     if (!session) throw new Error('Session not found');
 
@@ -453,17 +522,23 @@ class SITMDatabase {
     });
 
     const bookingConfirmation = {
-      bookingId: 'BK-' + uuidv4().substring(0, 8).toUpperCase(),
+      bookingId: 'SITM-' + uuidv4().substring(0, 8).toUpperCase(),
       sessionId: session.id,
       movieId: session.movieId,
       movieTitle: session.movie.title,
       venue: session.movie.venue,
+      screen: session.movie.screen,
       showtime: session.movie.time,
+      poster: session.movie.poster,
+      format: session.movie.format,
       seats: seatsToBook.map((idx) => ({
         index: idx,
         seatNumber: idx + 1,
         label: getSeatDetails(idx).label,
       })),
+      seatLabels: seatsToBook.map((idx) => getSeatDetails(idx).label).join(', '),
+      ticketCount: seatsToBook.length,
+      ticketPrice: session.movie.ticketPrice,
       totalPrice: Number((seatsToBook.length * session.movie.ticketPrice).toFixed(2)),
       bookedBy,
       paymentMethod,
@@ -496,6 +571,20 @@ class SITMDatabase {
     session.winnerOptionIndex = null;
     session.winningSeats = [];
     return session;
+  }
+
+  /**
+   * Get all confirmed bookings
+   */
+  getAllBookings() {
+    return [...this.bookings];
+  }
+
+  /**
+   * Get single booking by ID
+   */
+  getBooking(bookingId) {
+    return this.bookings.find((b) => b.bookingId === bookingId) || null;
   }
 }
 
