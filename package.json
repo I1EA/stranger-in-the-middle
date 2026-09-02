@@ -7,8 +7,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon -e js,ejs,css server.js",
-    "build:css": "npx @tailwindcss/cli -i ./public/src/main.css -o ./public/src/output.css --watch",
-    "build": "npx @tailwindcss/cli -i ./public/src/main.css -o ./public/src/output.css --minify",
+    "build:css": "npx @tailwindcss/cli -i ./public/src/main.css -o ./public/output.css --watch",
+    "build": "npx @tailwindcss/cli -i ./public/src/main.css -o ./public/output.css --minify",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
