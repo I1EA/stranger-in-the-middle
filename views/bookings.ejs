@@ -1,0 +1,27 @@
+<%- include('partials/header', { title }) %>
+<%- include('partials/navbar') %>
+
+<main class="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
+  <div class="mb-8">
+    <p class="text-xs font-bold uppercase tracking-widest text-blue-400">Your cinema wallet</p>
+    <h1 class="mt-2 text-4xl font-black text-white">My tickets</h1>
+    <p class="mt-2 text-slate-400">Confirmed group bookings from this session.</p>
+  </div>
+  <% if (bookings.length) { %>
+    <div class="grid md:grid-cols-2 gap-5">
+      <% bookings.forEach(function(booking) { %>
+        <article class="glass-panel rounded-2xl border border-slate-800 p-6">
+          <div class="flex items-start justify-between gap-4">
+            <div><h2 class="text-xl font-bold text-white"><%= booking.movieTitle %></h2><p class="mt-1 text-sm text-slate-400"><%= booking.venue %></p></div>
+            <span class="text-xs font-mono text-emerald-400"><%= booking.bookingId %></span>
+          </div>
+          <div class="mt-5 flex items-center justify-between text-sm"><span class="text-slate-400">Seats: <strong class="text-white"><%= booking.seatLabels %></strong></span><a href="/confirmation/<%= booking.bookingId %>" class="text-red-400 hover:text-red-300 font-semibold">Open pass &rarr;</a></div>
+        </article>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <div class="glass-panel rounded-2xl border border-slate-800 p-10 text-center"><p class="text-slate-300">No bookings yet.</p><a href="/" class="mt-4 inline-block text-red-400 hover:text-red-300">Find a movie &rarr;</a></div>
+  <% } %>
+</main>
+
+<%- include('partials/footer') %>

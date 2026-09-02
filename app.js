@@ -12,6 +12,7 @@ import viewRoutes from './routes/viewRoutes.js';
 import movieRoutes from './routes/movieRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import bookingRoutes from './routes/bookingRoutes.js';
 import ExpressError from './utils/ExpressError.js';
 import errorHandler from './utils/errorHandler.js';
 
@@ -30,7 +31,7 @@ app.set('views', path.join(__dirname, 'views'));
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Security Headers (configured to allow WebMCP Polyfill and inline scripts)
+// Security Headers (configured to allow WebMCP Polyfill, fonts, and images)
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -44,9 +45,9 @@ app.use(
           'https://cdn.jsdelivr.net',
         ],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-        imgSrc: ["'self'", 'data:', 'https:'],
-        connectSrc: ["'self'", 'https://unpkg.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+        connectSrc: ["'self'", 'https://unpkg.com', 'https://cdn.jsdelivr.net'],
       },
     },
     crossOriginEmbedderPolicy: false,
@@ -116,10 +117,11 @@ app.get('/api/health', (req, res) => {
 app.use('/', viewRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/sessions', sessionRoutes);
+app.use('/api/bookings', bookingRoutes);
 app.use('/api/users', userRoutes);
 
 // Catch-all 404 handler for undefined routes
-app.all('{*path}', (req, res, next) => {
+app.use((req, res, next) => {
   next(new ExpressError(`Cannot find ${req.method} ${req.originalUrl} on this server`, 404));
 });
 

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title : 'Stranger In The Middle · AI Group Cinema Booking' %></title>
+  
+  <!-- WebMCP Polyfill for Model Context Protocol in Browser / ChatGPT -->
+  <script src="https://unpkg.com/@mcp-b/webmcp-polyfill@latest/dist/index.iife.js"></script>
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Compiled Tailwind CSS -->
+  <link rel="stylesheet" href="/src/output.css" />
+  
+  <style>
+    h1, h2, h3, .font-cinema {
+      font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-[#080811] text-slate-100 min-h-screen flex flex-col selection:bg-red-600 selection:text-white">

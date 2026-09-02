@@ -115,8 +115,8 @@ router.post(
     }
 
     const session = db.castVote(req.params.id, {
-      voterId,
-      voterName,
+      voterId: voterId || req.session?.voterId,
+      voterName: voterName || req.session?.voterName || 'Group Member',
       optionIndex: parseInt(optionIndex, 10),
     });
 
@@ -164,8 +164,8 @@ router.post(
 
     const result = db.bookSeats(req.params.id, {
       seatIndices,
-      bookedBy,
-      paymentMethod,
+      bookedBy: bookedBy || 'Stranger In The Middle Agent',
+      paymentMethod: paymentMethod || 'card',
     });
 
     res.status(200).json({
@@ -191,6 +191,25 @@ router.post(
     res.status(200).json({
       status: 'success',
       message: 'Session reset successfully',
+      data: { session },
+    });
+  })
+);
+
+/**
+ * @route   GET /api/sessions/:id/export
+ * @desc    Export session data as JSON
+ */
+router.get(
+  '/:id/export',
+  catchAsync(async (req, res) => {
+    const session = db.getSession(req.params.id);
+    if (!session) {
+      throw new ExpressError(`Session with ID '${req.params.id}' not found`, 404);
+    }
+
+    res.status(200).json({
+      status: 'success',
       data: { session },
     });
   })

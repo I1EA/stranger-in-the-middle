@@ -7,13 +7,14 @@ const router = express.Router();
 
 /**
  * @route   GET /api/movies
- * @desc    Get all available movies with showtimes and venues
+ * @desc    Get all available movies with optional filtering by query, genre, or format
  * @access  Public
  */
 router.get(
   '/',
   catchAsync(async (req, res) => {
-    const movies = db.getAllMovies();
+    const { search, genre, format } = req.query;
+    const movies = db.getAllMovies({ search, genre, format });
     res.status(200).json({
       status: 'success',
       results: movies.length,
@@ -24,7 +25,7 @@ router.get(
 
 /**
  * @route   GET /api/movies/:id
- * @desc    Get single movie details
+ * @desc    Get single movie details with seat counts
  * @access  Public
  */
 router.get(
@@ -64,6 +65,8 @@ router.get(
       status: 'success',
       data: {
         movieId: req.params.id,
+        movieTitle: movie.title,
+        availableCount: seats.filter(Boolean).length,
         seats,
       },
     });
