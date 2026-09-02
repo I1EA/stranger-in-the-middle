@@ -1,5 +1,5 @@
 (() => {
-  const getContext = () => window.navigator?.modelContext;
+  const getContext = () => document.modelContext || window.navigator?.modelContext;
 
   const toolError = (message) => ({
     content: [{ type: 'text', text: message }],
@@ -116,6 +116,24 @@
             body: JSON.stringify({ seatIndices: seats.map((seat) => seat - 1), bookedBy: 'Stranger In The Middle AI' }),
           });
           return { content: [{ type: 'text', text: JSON.stringify(data.data) }] };
+        } catch (error) {
+          return toolError(error.message);
+        }
+      },
+    });
+
+    context.registerTool({
+      name: 'cancel_booking',
+      description: 'Cancel an existing booking and release its seats.',
+      inputSchema: {
+        type: 'object',
+        properties: { bookingId: { type: 'string' } },
+        required: ['bookingId'],
+      },
+      execute: async ({ bookingId }) => {
+        try {
+          const data = await requestJson(`/api/bookings/${encodeURIComponent(bookingId)}`, { method: 'DELETE' });
+          return { content: [{ type: 'text', text: data.message }] };
         } catch (error) {
           return toolError(error.message);
         }
