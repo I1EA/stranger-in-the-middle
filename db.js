@@ -348,6 +348,7 @@ class SITMDatabase {
       status: 'ready', // 'ready' | 'voting' | 'ended' | 'booked'
       winnerOptionIndex: null,
       winningSeats: [],
+      selectedSeats: [],
       timerSeconds: 120,
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 120 * 1000).toISOString(),
@@ -355,6 +356,13 @@ class SITMDatabase {
     };
 
     this.sessions.set(sessionId, session);
+    return session;
+  }
+
+  setSelectedSeats(sessionId, seatIndices) {
+    const session = this.getSession(sessionId);
+    if (!session) return null;
+    session.selectedSeats = [...seatIndices];
     return session;
   }
 
@@ -382,6 +390,7 @@ class SITMDatabase {
     session.status = 'ready';
     session.winnerOptionIndex = null;
     session.winningSeats = [];
+    session.selectedSeats = [];
     return session;
   }
 
@@ -501,7 +510,7 @@ class SITMDatabase {
     const session = this.getSession(sessionId);
     if (!session) throw new Error('Session not found');
 
-    const seatsToBook = seatIndices || session.winningSeats;
+    const seatsToBook = seatIndices || (session.selectedSeats.length > 0 ? session.selectedSeats : session.winningSeats);
     if (!seatsToBook || seatsToBook.length === 0) {
       throw new Error('No seats selected to book.');
     }
@@ -570,6 +579,7 @@ class SITMDatabase {
     session.status = 'ready';
     session.winnerOptionIndex = null;
     session.winningSeats = [];
+    session.selectedSeats = [];
     return session;
   }
 

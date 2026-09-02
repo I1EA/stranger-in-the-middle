@@ -107,16 +107,16 @@
         type: 'object',
         properties: {
           sessionId: { type: 'string' },
-          seats: { type: 'array', items: { type: 'integer', minimum: 1, maximum: 48 } },
+          seats: { type: 'array', items: { type: 'integer', minimum: 1, maximum: 48 }, description: 'Optional one-based seats. Omit to book the room winner or selected block.' },
         },
-        required: ['sessionId', 'seats'],
+        required: ['sessionId'],
       },
       execute: async ({ sessionId, seats }) => {
         try {
           const data = await requestJson(`/api/sessions/${encodeURIComponent(sessionId)}/book`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ seatIndices: seats.map((seat) => seat - 1), bookedBy: 'Stranger In The Middle AI' }),
+            body: JSON.stringify({ seatIndices: seats?.map((seat) => seat - 1), bookedBy: 'Stranger In The Middle AI' }),
           });
           return { content: [{ type: 'text', text: JSON.stringify(data.data) }] };
         } catch (error) {

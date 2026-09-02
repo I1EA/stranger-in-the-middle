@@ -163,7 +163,7 @@ router.post(
     const { seatIndices, bookedBy, paymentMethod } = req.body;
 
     const result = db.bookSeats(req.params.id, {
-      seatIndices,
+      seatIndices: Array.isArray(seatIndices) && seatIndices.length > 0 ? seatIndices : undefined,
       bookedBy: bookedBy || 'Stranger In The Middle Agent',
       paymentMethod: paymentMethod || 'card',
     });
@@ -173,6 +173,19 @@ router.post(
       message: 'Seats booked and confirmed successfully!',
       data: result,
     });
+  })
+);
+
+router.post(
+  '/:id/select-seats',
+  catchAsync(async (req, res) => {
+    const { seatIndices } = req.body;
+    if (!Array.isArray(seatIndices) || seatIndices.length === 0) {
+      throw new ExpressError('seatIndices must contain at least one seat', 400);
+    }
+    const session = db.setSelectedSeats(req.params.id, seatIndices);
+    if (!session) throw new ExpressError(`Session with ID '${req.params.id}' not found`, 404);
+    res.status(200).json({ status: 'success', data: { session } });
   })
 );
 

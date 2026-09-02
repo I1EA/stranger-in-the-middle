@@ -14,12 +14,23 @@
   <div class="grid min-w-0 lg:grid-cols-[1.2fr_0.8fr] gap-4 sm:gap-6">
     <%- include('partials/seat-matrix') %>
     <div class="space-y-6">
-      <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-        <span id="agentStatus" class="min-w-0 text-xs sm:text-sm text-emerald-400 wrap-break-word">AI options ready. Select a block.</span>
-        <button id="startVoteBtn" type="button" class="shrink-0 rounded-xl bg-amber-500 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-amber-400">Start group vote</button>
+      <div class="flex flex-col items-stretch gap-3 rounded-xl border border-slate-800 bg-slate-950/60 p-3 sm:flex-row sm:items-center sm:justify-between">
+        <span id="agentStatus" class="w-full min-w-0 text-xs sm:text-sm text-emerald-400 wrap-break-word">AI options ready. Select a block.</span>
+        <div class="flex w-full flex-wrap justify-start gap-2 sm:justify-end">
+          <select id="groupSize" class="rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-xs text-white" aria-label="Group size">
+            <% for (let size = 1; size <= 8; size += 1) { %><option value="<%= size %>" <%= session.groupSize === size ? 'selected' : '' %>><%= size %> seats</option><% } %>
+          </select>
+          <select id="manualRow" class="rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-xs text-white" aria-label="Seat row">
+            <% ['A', 'B', 'C', 'D', 'E', 'F'].forEach((row) => { %><option value="<%= row %>">Row <%= row %></option><% }) %>
+          </select>
+          <select id="manualColumn" class="rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-xs text-white" aria-label="Starting seat column"></select>
+          <button id="applyManualBtn" type="button" class="rounded-xl border border-emerald-500/60 px-3 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-950/40">Select block</button>
+          <button id="startVoteBtn" type="button" class="rounded-xl bg-amber-500 px-3 py-2 text-xs font-bold text-slate-950 hover:bg-amber-400">Start vote</button>
+        </div>
       </div>
       <%- include('partials/voting-arena') %>
       <%- include('partials/ai-terminal') %>
+      <button id="bookBtn" type="button" class="w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-black text-slate-950 hover:bg-emerald-400">Lock seats and book tickets</button>
     </div>
   </div>
 </main>
@@ -44,12 +55,62 @@
 
   function selectOption(index) {
     if (votingActive) return;
+    if (index < 0 || !suggestions[index]) return;
     selectedSeats = suggestions[index].seats.slice();
     document.querySelectorAll('.rec-card').forEach((card, cardIndex) => {
       card.classList.toggle('active', cardIndex === index);
     });
     document.getElementById('agentStatus').textContent = 'Selected: Option ' + (index + 1) + ' (seats ' + selectedSeats.map(seatLabel).join(', ') + ')';
     renderSeats();
+    fetch('/api/sessions/' + encodeURIComponent(sessionId) + '/select-seats', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seatIndices: selectedSeats })
+    }).catch(() => {});
+  }
+
+  function updateColumnChoices() {
+    const size = Number(document.getElementById('groupSize').value);
+    const column = document.getElementById('manualColumn');
+    column.innerHTML = '';
+    for (let start = 1; start <= 9 - size; start += 1) {
+      column.add(new Option('Seats ' + start + '-' + (start + size - 1), start));
+    }
+  }
+
+  function applyManualSelection() {
+    const size = Number(document.getElementById('groupSize').value);
+    const row = document.getElementById('manualRow').selectedIndex;
+    const start = Number(document.getElementById('manualColumn').value) - 1;
+    const seats = Array.from({ length: size }, (_, offset) => row * 8 + start + offset);
+    if (seats.some((seat) => !availableSeats[seat])) {
+      document.getElementById('agentStatus').textContent = 'That block contains an occupied seat. Choose another row or column.';
+      return;
+    }
+    selectedSeats = seats;
+    document.querySelectorAll('.rec-card').forEach((card) => card.classList.remove('active'));
+    document.getElementById('agentStatus').textContent = 'Selected manual block: ' + seats.map(seatLabel).join(', ');
+    renderSeats();
+    fetch('/api/sessions/' + encodeURIComponent(sessionId) + '/select-seats', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seatIndices: selectedSeats })
+    }).catch(() => {});
+  }
+
+  async function bookTickets() {
+    if (selectedSeats.length === 0) {
+      document.getElementById('agentStatus').textContent = 'Select a seat block before booking.';
+      return;
+    }
+    const response = await fetch('/api/sessions/' + encodeURIComponent(sessionId) + '/book', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seatIndices: selectedSeats, bookedBy: 'Group Coordinator' })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      document.getElementById('agentStatus').textContent = data.error?.message || 'Booking failed.';
+      return;
+    }
+    window.location.href = '/confirmation/' + data.data.booking.bookingId;
   }
 
   function renderRecommendations() {
@@ -176,6 +237,10 @@
 
   document.getElementById('startVoteBtn')?.addEventListener('click', startVoting);
   document.getElementById('endVotingBtn')?.addEventListener('click', endVoting);
+  document.getElementById('groupSize')?.addEventListener('change', updateColumnChoices);
+  document.getElementById('applyManualBtn')?.addEventListener('click', applyManualSelection);
+  document.getElementById('bookBtn')?.addEventListener('click', bookTickets);
+  updateColumnChoices();
   renderSeats();
   renderRecommendations();
 </script>
