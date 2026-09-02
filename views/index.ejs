@@ -30,7 +30,7 @@
             <p class="mt-3 text-sm text-slate-400 line-clamp-2"><%= m.description %></p>
             <div class="mt-auto pt-5 flex items-center justify-between gap-3">
               <span class="text-sm font-bold text-white">£<%= Number(m.ticketPrice).toFixed(2) %> <span class="font-normal text-slate-500">/ ticket</span></span>
-              <button class="rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-500 transition-colors" onclick="startSession('<%= m.id %>')">Start group</button>
+              <button type="button" data-start-session="<%= m.id %>" class="rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-500 transition-colors">Start group</button>
             </div>
           </div>
         </article>
@@ -68,12 +68,12 @@
   <section id="sessionSection" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
       <div><p class="text-xs font-bold uppercase tracking-widest text-red-400">Live group room</p><h2 class="mt-2 text-3xl font-black text-white">Find your shared seats</h2><p id="movieName" class="mt-2 text-slate-400"></p><p id="movieDetails" class="text-xs text-slate-500"></p></div>
-      <button class="rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 hover:border-red-500 hover:text-white" onclick="backToMovies()">Change movie</button>
+    <button id="backToMoviesBtn" type="button" class="rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 hover:border-red-500 hover:text-white">Change movie</button>
     </div>
-    <div id="shareBanner" class="hidden mb-5 rounded-2xl border border-blue-500/30 bg-blue-950/30 p-4 text-sm text-blue-200"><strong>Invite your group:</strong> share this room link. <button class="ml-3 font-bold text-white underline" onclick="copySessionLink()">Copy invite link</button></div>
+    <div id="shareBanner" class="hidden mb-5 rounded-2xl border border-blue-500/30 bg-blue-950/30 p-4 text-sm text-blue-200"><strong>Invite your group:</strong> share this room link. <button id="copySessionLinkBtn" type="button" class="ml-3 font-bold text-white underline">Copy invite link</button></div>
     <div class="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
       <label for="groupSize" class="text-sm text-slate-400">Group size</label><select id="groupSize" class="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select>
-    <button id="findBtn" class="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-500">Find best blocks</button><span id="agentStatus" class="text-sm text-emerald-400"></span><span id="statusBar" class="w-full text-xs text-slate-500 sm:w-auto sm:ml-auto">Status: <span class="highlight">Ready</span></span>
+    <button id="findBtn" class="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-500">Find best blocks</button><button id="startVoteBtn" class="hidden rounded-xl border border-amber-500/50 px-4 py-2 text-sm font-bold text-amber-300 hover:bg-amber-950/40">Start group vote</button><span id="agentStatus" class="text-sm text-emerald-400"></span><span id="statusBar" class="w-full text-xs text-slate-500 sm:w-auto sm:ml-auto">Status: <span class="highlight">Ready</span></span>
     </div>
     <div id="votingBar" class="voting-bar hidden mb-6"><div><div id="votingStatus" class="status-text">Waiting for votes...</div><div class="text-xs text-amber-400/70">Everyone chooses their preferred block</div></div><div id="timerDisplay" class="timer">2:00</div><button id="endVotingBtn" class="btn-danger">End voting</button></div>
     <div id="recContainer" class="rec-wrap mb-6"></div>
@@ -335,8 +335,8 @@
                     let cls = 'seat ';
                     if (!available[idx]) cls += 'seat-taken';
                     else if (isWinning && !votingActive) cls += 'seat-voted';
-                    else if (isSuggested) cls += 'seat-suggested';
                     else if (isSelected) cls += 'seat-selected';
+                    else if (isSuggested) cls += 'seat-suggested';
                     else cls += 'seat-avail';
 
                     seat.className = cls;
@@ -599,12 +599,21 @@
             document.getElementById('recContainer').innerHTML = '';
             document.getElementById('agentStatus').textContent = '';
             document.getElementById('votingBar').classList.add('hidden');
+            document.getElementById('startVoteBtn').classList.add('hidden');
             document.getElementById('bookBtn').style.display = 'none';
             document.getElementById('agentBookBtn').style.display = 'none';
 
             renderSeats();
             updateStatus('Session started for ' + mv.title + '. Click "Find Seats" to get options.');
         }
+
+        document.querySelectorAll('[data-start-session]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                startSession(button.dataset.startSession);
+            });
+        });
+        document.getElementById('backToMoviesBtn').addEventListener('click', backToMovies);
+        document.getElementById('copySessionLinkBtn').addEventListener('click', copySessionLink);
 
         // Find Seats Button Click
         document.getElementById('findBtn').addEventListener('click', function() {
@@ -686,10 +695,13 @@
                 container.appendChild(card);
             }
 
-            // Start voting automatically
-            setTimeout(startVoting, 400);
-            document.getElementById('agentStatus').textContent = 'AI found ' + blocks.length + ' seat blocks. Voting begins now!';
-            updateStatus('Found ' + blocks.length + ' options. Voting begins now.');
+            document.getElementById('startVoteBtn').classList.remove('hidden');
+            document.getElementById('agentStatus').textContent = 'AI found ' + blocks.length + ' seat blocks. Select one to continue.';
+            updateStatus('Found ' + blocks.length + ' options. Select a block to book or start a group vote.');
+        });
+
+        document.getElementById('startVoteBtn').addEventListener('click', function() {
+            startVoting();
         });
 
         // End voting early
@@ -702,22 +714,29 @@
         });
 
         // Manual booking - individual payment
-        document.getElementById('bookBtn').addEventListener('click', function() {
+        document.getElementById('bookBtn').addEventListener('click', async function() {
             if (selectedSeats.length === 0) return;
             const nums = selectedSeats.map(s => seatNumber(s));
-            const userSeat = nums[0];
-            const userLabel = seatLabel(selectedSeats[0]);
-
-            nums.forEach(n => { available[n - 1] = false; });
-            selectedSeats = [];
-            suggestions = [];
-            currentSuggestionIdx = -1;
-            document.getElementById('recContainer').innerHTML = '';
-            document.getElementById('votingBar').classList.add('hidden');
-            renderSeats();
-            document.getElementById('agentStatus').textContent = 'Paid for seat ' + userLabel + '.';
-            updateStatus('You paid for seat ' + userLabel + '. Group booking confirmed.');
-            showToast(' Seat ' + userLabel + ' confirmed & paid!');
+            const button = this;
+            button.disabled = true;
+            button.textContent = 'Booking...';
+            try {
+                const response = await fetch('/api/sessions/' + currentSessionId + '/book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seatIndices: nums.map(n => n - 1), bookedBy: 'Group Member' })
+                });
+                const data = await response.json();
+                if (!response.ok || !data.data?.booking?.bookingId) {
+                    throw new Error(data.error?.message || 'Booking could not be completed.');
+                }
+                window.location.href = '/confirmation/' + data.data.booking.bookingId;
+            } catch (error) {
+                button.disabled = false;
+                button.textContent = 'Confirm and pay';
+                document.getElementById('agentStatus').textContent = error.message;
+                updateStatus('Booking failed. Please choose available seats and try again.');
+            }
         });
 
         // Agent books all (Stranger In The Middle books everyone)

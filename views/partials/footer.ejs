@@ -113,6 +113,15 @@
         </div>
         <p class="text-slate-400 text-[11px]">Books the highest-scoring available block for a new group.</p>
       </div>
+
+      <!-- Tool 5 -->
+      <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="font-mono font-bold text-emerald-400">cancel_booking()</span>
+          <button type="button" data-mcp-tool="cancel_booking" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
+        </div>
+        <p class="text-slate-400 text-[11px]">Cancels a demo booking and releases its seats.</p>
+      </div>
     </div>
 
     <div>
@@ -130,6 +139,9 @@
 
   document.getElementById('webmcpStatusBadge')?.addEventListener('click', toggleMcpDrawer);
   document.getElementById('closeMcpDrawer')?.addEventListener('click', toggleMcpDrawer);
+  document.getElementById('endVotingBtn')?.addEventListener('click', () => {
+    if (typeof endVoting === 'function') endVoting();
+  });
   document.querySelectorAll('[data-mcp-tool]').forEach((button) => {
     button.addEventListener('click', () => {
       const input = button.dataset.mcpTool === 'get_available_seats'
@@ -138,6 +150,21 @@
           ? { movieId: 'spiderman', groupSize: 4 }
           : {};
       testMcpTool(button.dataset.mcpTool, input);
+    });
+  });
+  document.querySelectorAll('[data-cancel-booking]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      if (!window.confirm('Cancel this booking and release its seats?')) return;
+      button.disabled = true;
+      try {
+        const response = await fetch('/api/bookings/' + encodeURIComponent(button.dataset.cancelBooking), { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error?.message || 'Cancellation failed.');
+        window.location.href = '/bookings';
+      } catch (error) {
+        button.disabled = false;
+        window.alert(error.message);
+      }
     });
   });
 
@@ -184,6 +211,23 @@
         });
         const bookingData = await bookingRes.json();
         consoleEl.textContent = 'SITM AI booked session ' + session.id + ':\n' + JSON.stringify(bookingData, null, 2);
+      } else if (toolName === 'cancel_booking') {
+        const sessionRes = await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ movieId: 'spiderman', groupSize: 2 })
+        });
+        const sessionData = await sessionRes.json();
+        const session = sessionData.data.session;
+        const bookingRes = await fetch('/api/sessions/' + session.id + '/book', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ seatIndices: session.suggestions[0].seats, bookedBy: 'Stranger In The Middle AI' })
+        });
+        const bookingData = await bookingRes.json();
+        const cancelRes = await fetch('/api/bookings/' + bookingData.data.booking.bookingId, { method: 'DELETE' });
+        const cancelData = await cancelRes.json();
+        consoleEl.textContent = 'SITM AI cancelled booking ' + bookingData.data.booking.bookingId + ':\n' + JSON.stringify(cancelData, null, 2);
       }
     } catch (err) {
       consoleEl.textContent = 'Error: ' + err.message;

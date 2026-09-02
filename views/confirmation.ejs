@@ -11,7 +11,10 @@
       <div class="rounded-2xl bg-black/30 border border-slate-800 p-4"><span class="text-xs text-slate-500">Booking ID</span><div class="mt-1 font-mono text-white"><%= booking.bookingId %></div></div>
       <div class="rounded-2xl bg-black/30 border border-slate-800 p-4"><span class="text-xs text-slate-500">Seats</span><div class="mt-1 text-white"><%= (booking.seats || []).map(seat => seat.label || seat).join(', ') %></div></div>
     </div>
-    <a href="/bookings" class="mt-8 inline-flex rounded-xl bg-red-600 px-5 py-3 font-bold text-white hover:bg-red-500">View my tickets</a>
+    <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+      <a href="/bookings" class="inline-flex rounded-xl bg-red-600 px-5 py-3 font-bold text-white hover:bg-red-500">View my tickets</a>
+      <button type="button" data-cancel-booking="<%= booking.bookingId %>" class="inline-flex rounded-xl border border-red-500/50 px-5 py-3 font-bold text-red-300 hover:bg-red-950/50">Cancel tickets</button>
+    </div>
   </section>
 </main>
 

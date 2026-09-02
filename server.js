@@ -15,7 +15,7 @@ const server = app.listen(PORT, () => {
   console.log(`   Health Check:     http://localhost:${PORT}/api/health`);
   console.log(`   Movies API:       http://localhost:${PORT}/api/movies`);
   console.log(`   Sessions API:     http://localhost:${PORT}/api/sessions`);
-  console.log(`   WebMCP Tools:     search_movies, get_available_seats, book_tickets, stranger_vote`);
+  console.log(`   WebMCP Tools:     search_movies, get_available_seats, book_tickets, cancel_booking, stranger_vote`);
   console.log(`   Environment:      ${process.env.NODE_ENV || 'development'}`);
   console.log(`${divider}\n`);
 });

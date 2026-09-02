@@ -72,11 +72,8 @@ router.get(
     const session = db.getSession(req.params.id);
     const movies = db.getAllMovies();
 
-    // If session doesn't exist, create a default session for spiderman or prompt creation
     if (!session) {
-      // Auto-create or render with fallback
-      const newSession = db.createSession({ movieId: 'spiderman', groupSize: 4 });
-      return res.redirect(`/session/${newSession.id}`);
+      throw new ExpressError(`Session '${req.params.id}' not found`, 404);
     }
 
     res.render('session', {

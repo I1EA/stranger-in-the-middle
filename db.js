@@ -586,6 +586,33 @@ class SITMDatabase {
   getBooking(bookingId) {
     return this.bookings.find((b) => b.bookingId === bookingId) || null;
   }
+
+  /**
+   * Cancel a booking and release its seats back to the session and movie.
+   */
+  cancelBooking(bookingId) {
+    const bookingIndex = this.bookings.findIndex((booking) => booking.bookingId === bookingId);
+    if (bookingIndex === -1) return null;
+
+    const [booking] = this.bookings.splice(bookingIndex, 1);
+    const session = this.getSession(booking.sessionId);
+
+    if (session) {
+      session.bookings = session.bookings.filter((item) => item.bookingId !== bookingId);
+      booking.seats.forEach(({ index }) => {
+        session.available[index] = true;
+        if (this.movieSeatGrids[session.movieId]) {
+          this.movieSeatGrids[session.movieId][index] = true;
+        }
+      });
+      session.suggestions = findBestBlocks(session.available, session.groupSize);
+      session.status = session.bookings.length ? 'booked' : 'ready';
+      session.winnerOptionIndex = null;
+      session.winningSeats = [];
+    }
+
+    return booking;
+  }
 }
 
 // Global Singleton Instance

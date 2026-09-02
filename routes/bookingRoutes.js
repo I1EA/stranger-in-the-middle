@@ -39,4 +39,24 @@ router.get(
   })
 );
 
+/**
+ * @route   DELETE /api/bookings/:id
+ * @desc    Cancel a booking and release its seats
+ */
+router.delete(
+  '/:id',
+  catchAsync(async (req, res) => {
+    const booking = db.cancelBooking(req.params.id);
+    if (!booking) {
+      throw new ExpressError(`Booking '${req.params.id}' not found`, 404);
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Booking cancelled and seats released.',
+      data: { booking },
+    });
+  })
+);
+
 export default router;
