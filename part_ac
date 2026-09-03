@@ -1,0 +1,200 @@
+      var agentStatus = document.getElementById('agentStatus');
+      if (agentStatus) agentStatus.textContent = 'Need at least 2 options to vote.';
+      return;
+    }
+    votingActive = true;
+    hasVoted = false;
+    votes = {};
+    for (var i = 0; i < suggestions.length; i++) {
+      votes[i] = 0;
+      suggestions[i].votes = 0;
+    }
+    var votingBar = document.getElementById('votingBar');
+    if (votingBar) votingBar.classList.remove('hidden');
+    var votingStatus = document.getElementById('votingStatus');
+    if (votingStatus) votingStatus.textContent = 'Vote for your preferred seats!';
+    var agentStatus = document.getElementById('agentStatus');
+    if (agentStatus) agentStatus.textContent = 'Voting open! Choose your option.';
+    timeLeft = 120;
+    updateTimerDisplay();
+    clearInterval(timerInterval);
+    timerInterval = setInterval(function() {
+      timeLeft--;
+      updateTimerDisplay();
+      if (timeLeft <= 0) { endVoting(); }
+    }, 1000);
+    var cards = document.querySelectorAll('.rec-card');
+    cards.forEach(function(card, idx) {
+      var btn = card.querySelector('.vote-btn');
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Vote';
+        btn.className = 'vote-btn';
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          castVote(idx);
+        };
+      }
+    });
+    sessionActive = true;
+    updateStatus('Voting open! 2 minutes to choose.');
+    if (currentSessionId) {
+      fetch('/api/sessions/' + currentSessionId + '/start-voting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ durationSeconds: 120 })
+      }).catch(function() {});
+    }
+  }
+
+  function castVote(optionIdx) {
+    if (!votingActive) {
+      var agentStatus = document.getElementById('agentStatus');
+      if (agentStatus) agentStatus.textContent = 'Voting has ended.';
+      return;
+    }
+    if (hasVoted) {
+      var agentStatus = document.getElementById('agentStatus');
+      if (agentStatus) agentStatus.textContent = 'You already voted!';
+      return;
+    }
+    votes[optionIdx] = (votes[optionIdx] || 0) + 1;
+    suggestions[optionIdx].votes = votes[optionIdx];
+    hasVoted = true;
+    var votingStatus = document.getElementById('votingStatus');
+    if (votingStatus) votingStatus.textContent = 'You voted! Waiting for others...';
+    var agentStatus = document.getElementById('agentStatus');
+    if (agentStatus) agentStatus.textContent = 'Vote cast for Option ' + (optionIdx + 1);
+    var cards = document.querySelectorAll('.rec-card');
+    cards.forEach(function(card, idx) {
+      var countEl = card.querySelector('.vote-count');
+      if (countEl) { countEl.textContent = suggestions[idx] ? suggestions[idx].votes + ' votes' : '0 votes'; }
+      var btn = card.querySelector('.vote-btn');
+      if (btn) {
+        btn.textContent = suggestions[idx] ? suggestions[idx].votes + ' votes' : '0 votes';
+        btn.disabled = true;
+        btn.className = 'vote-btn voted-btn';
+      }
+    });
+    if (currentSessionId) {
+      fetch('/api/sessions/' + currentSessionId + '/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ optionIndex: optionIdx, voterName: 'Group Member' })
+      }).catch(function() {});
+    }
+    var totalVotes = 0;
+    for (var key in votes) {
+      if (votes.hasOwnProperty(key)) { totalVotes += votes[key]; }
+    }
+    if (totalVotes >= groupSize) {
+      var votingStatus = document.getElementById('votingStatus');
+      if (votingStatus) votingStatus.textContent = 'Everyone voted! Finalizing winner...';
+      setTimeout(endVoting, 1200);
+    }
+  }
+
+  // ============================================================
+  // END VOTING - CALLS showPaymentChoice()
+  // ============================================================
+  function endVoting() {
+    clearInterval(timerInterval);
+    votingActive = false;
+    var maxVotes = -1;
+    var winnerIdx = -1;
+    for (var i = 0; i < suggestions.length; i++) {
+      if (suggestions[i].votes > maxVotes) {
+        maxVotes = suggestions[i].votes;
+        winnerIdx = i;
+      }
+    }
+    var tied = [];
+    for (var j = 0; j < suggestions.length; j++) {
+      if (suggestions[j].votes === maxVotes) tied.push(j);
+    }
+    if (tied.length > 1) {
+      var bestScore = -1;
+      for (var k = 0; k < tied.length; k++) {
+        var idx2 = tied[k];
+        if (suggestions[idx2].score > bestScore) {
+          bestScore = suggestions[idx2].score;
+          winnerIdx = idx2;
+        }
+      }
+    }
+    if (winnerIdx >= 0 && maxVotes > 0) {
+      var winner = suggestions[winnerIdx];
+      var votingStatus = document.getElementById('votingStatus');
+      if (votingStatus) votingStatus.textContent = 'Winner: Option ' + (winnerIdx + 1) + ' with ' + maxVotes + ' votes!';
+      var agentStatus = document.getElementById('agentStatus');
+      if (agentStatus) agentStatus.textContent = winner.view + ' · ' + winner.leg + ' Selected by group vote!';
+      selectedSeats = winner.seats.slice();
+      currentSuggestionIdx = winnerIdx;
+      var cards2 = document.querySelectorAll('.rec-card');
+      cards2.forEach(function(card, idx3) {
+        if (idx3 === winnerIdx) {
+          card.classList.add('active');
+          var badge = card.querySelector('.tag-sm');
+          if (badge) badge.textContent = 'WINNER';
+        }
+        var btn2 = card.querySelector('.vote-btn');
+        if (btn2) {
+          btn2.disabled = true;
+          btn2.textContent = suggestions[idx3].votes + ' votes';
+        }
+        var countEl2 = card.querySelector('.vote-count');
+        if (countEl2) {
+          countEl2.textContent = suggestions[idx3].votes + ' votes';
+        }
+      });
+      renderSeats();
+      updateStatus('Winner: Option ' + (winnerIdx + 1) + ' ' + winner.view + ', ' + winner.leg + ' (' + maxVotes + ' votes)');
+      showToast('Winning option selected: Option ' + (winnerIdx + 1));
+      
+      // ============================================================
+      // SHOW PAYMENT CHOICE
+      // ============================================================
+      showPaymentChoice();
+      
+      if (currentSessionId) {
+        fetch('/api/sessions/' + currentSessionId + '/end-voting', { method: 'POST' }).catch(function() {});
+      }
+    } else {
+      var votingStatus = document.getElementById('votingStatus');
+      if (votingStatus) votingStatus.textContent = 'No votes cast. Try again.';
+      var agentStatus = document.getElementById('agentStatus');
+      if (agentStatus) agentStatus.textContent = 'No votes. Click Find Seats to restart.';
+    }
+    sessionActive = false;
+  }
+
+  function updateTimerDisplay() {
+    var mins = Math.floor(timeLeft / 60);
+    var secs = timeLeft % 60;
+    var timerDisplay = document.getElementById('timerDisplay');
+    if (timerDisplay) {
+      timerDisplay.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+      if (timeLeft < 30) {
+        timerDisplay.style.color = '#dc2626';
+      } else {
+        timerDisplay.style.color = '#92400e';
+      }
+    }
+  }
+
+  // ============================================================
+  // START SESSION
+  // ============================================================
+  function startSession(id) {
+    selectedMovieId = id;
+    selectedSeats = [];
+    suggestions = [];
+    currentSuggestionIdx = -1;
+    votes = {};
+    votingActive = false;
+    sessionActive = false;
+    hasVoted = false;
+    clearInterval(timerInterval);
+    groupSize = parseInt(document.getElementById('groupSize').value);
+    fetch('/api/movies/' + id + '/seats').then(function(res) {
+      return res.json();

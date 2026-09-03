@@ -6,7 +6,7 @@
     <div>
       <p class="text-xs font-bold uppercase tracking-widest text-red-400">SITM Arena</p>
       <h1 class="mt-2 text-2xl sm:text-4xl font-black text-white wrap-break-word"><%= session.movie.title %></h1>
-      <p class="mt-2 text-sm text-slate-400">Room <span class="font-mono text-slate-200"><%= sessionId %></span> &middot; Group of <%= session.groupSize %></p>
+      <p class="mt-2 text-sm text-slate-400">Room <span class="font-mono text-slate-200"><%= sessionId %></span> &middot; Group of <span id="groupSizeDisplay"><%= session.groupSize %></span></p>
     </div>
     <a href="/" class="inline-flex w-fit rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-red-500 hover:text-white">Browse movies</a>
   </div>
@@ -30,6 +30,33 @@
       </div>
       <%- include('partials/voting-arena') %>
       <%- include('partials/ai-terminal') %>
+
+      <!-- PAYMENT CHOICE -->
+      <div id="paymentChoice" class="hidden mt-4 p-4 rounded-2xl border border-amber-500/30 bg-amber-950/20">
+        <h3 class="text-lg font-bold text-white mb-3">How do you want to book?</h3>
+        <div class="flex flex-wrap gap-4">
+          <button id="splitPayBtn" class="flex-1 min-w-[150px] rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-500 transition-colors">Each person pays their own</button>
+          <button id="strangerPayBtn" class="flex-1 min-w-[150px] rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-500 transition-colors">Stranger books all (one person pays)</button>
+          <button id="birthdayPayBtn" class="flex-1 min-w-[150px] rounded-xl bg-purple-600 px-4 py-3 text-sm font-bold text-white hover:bg-purple-500 transition-colors">Birthday split (group shares)</button>
+        </div>
+        <p class="mt-3 text-xs text-slate-400">Each person pays for their own seat, one person pays for everyone, or the group shares the birthday person's seat.</p>
+      </div>
+
+      <!-- INDIVIDUAL PAYMENT -->
+      <div id="splitPayment" class="hidden mt-4 p-4 rounded-2xl border border-emerald-500/30 bg-emerald-950/20">
+        <h4 class="text-sm font-bold text-white mb-3">Each person pays for their seat</h4>
+        <div id="seatPaymentList" class="space-y-2"></div>
+        <button id="confirmSplitPayment" class="mt-4 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-500 transition-colors hidden">Confirm all payments</button>
+      </div>
+
+      <!-- BIRTHDAY PAYMENT -->
+      <div id="birthdayPayment" class="hidden mt-4 p-4 rounded-2xl border border-purple-500/30 bg-purple-950/20">
+        <h4 class="text-sm font-bold text-white mb-3">Birthday Split - Everyone shares the birthday person's seat</h4>
+        <p class="text-sm text-slate-300 mb-3">Select who the birthday person is:</p>
+        <div id="birthdayPersonList" class="space-y-2"></div>
+        <button id="confirmBirthdayPayment" class="mt-4 rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold text-white hover:bg-purple-500 transition-colors hidden">Confirm birthday split</button>
+      </div>
+
       <button id="bookBtn" type="button" class="w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-black text-slate-950 hover:bg-emerald-400">Lock seats and book tickets</button>
     </div>
   </div>
@@ -47,6 +74,7 @@
   let hasVoted = false;
   let timerInterval;
   let timeLeft = 120;
+  let groupSize = <%- JSON.stringify(session.groupSize) %>;
 
   const seatLabel = (index) => {
     const row = Math.floor(index / 8);
@@ -219,6 +247,9 @@
     }).catch(() => {});
   }
 
+  // ============================================================
+  // END VOTING - FORCED TO SHOW PAYMENT OPTIONS
+  // ============================================================
   async function endVoting() {
     if (!votingActive) return;
     votingActive = false;
@@ -228,6 +259,23 @@
       selectOption(winnerIndex);
       document.getElementById('votingStatus').textContent = 'Winner: Option ' + (winnerIndex + 1);
       document.getElementById('agentStatus').textContent = 'Option ' + (winnerIndex + 1) + ' selected by group vote.';
+      
+      // ============================================================
+      // FORCE SHOW PAYMENT CHOICE
+      // ============================================================
+      var paymentChoice = document.getElementById('paymentChoice');
+      if (paymentChoice) {
+        paymentChoice.classList.remove('hidden');
+        paymentChoice.style.display = 'block';
+        paymentChoice.style.visibility = 'visible';
+      }
+      var agentStatus = document.getElementById('agentStatus');
+      if (agentStatus) {
+        agentStatus.textContent = 'Choose how to book: split, all at once, or birthday.';
+      }
+      // Scroll to payment options
+      paymentChoice.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
     } else {
       document.getElementById('votingStatus').textContent = 'No votes cast. Select an option to continue.';
     }
@@ -235,11 +283,134 @@
     await fetch('/api/sessions/' + encodeURIComponent(sessionId) + '/end-voting', { method: 'POST' }).catch(() => {});
   }
 
+  // ============================================================
+  // PAYMENT HANDLERS
+  // ============================================================
+
+  // SPLIT PAYMENT
+  document.getElementById('splitPayBtn').addEventListener('click', function() {
+    document.getElementById('paymentChoice').classList.add('hidden');
+    document.getElementById('splitPayment').classList.remove('hidden');
+    var list = document.getElementById('seatPaymentList');
+    list.innerHTML = '';
+    var pricePerSeat = 12.50;
+    selectedSeats.forEach(function(seatIndex2, idx) {
+      var seatNum = seatIndex2 + 1;
+      var row = String.fromCharCode(65 + Math.floor(seatIndex2 / 8));
+      var col = (seatIndex2 % 8) + 1;
+      var item = document.createElement('div');
+      item.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-800/50';
+      item.innerHTML = '<span class="text-sm text-white">Person ' + (idx + 1) + ' - Seat ' + row + col + ' - GBP ' + pricePerSeat.toFixed(2) + '</span><button class="pay-seat-btn rounded-lg bg-emerald-600 px-3 py-1 text-xs font-bold text-white hover:bg-emerald-500 transition-colors" data-seat="' + seatNum + '" data-person="' + (idx + 1) + '">Pay Now</button>';
+      list.appendChild(item);
+    });
+    var payBtns = document.querySelectorAll('.pay-seat-btn');
+    payBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        this.textContent = 'Paid!';
+        this.className = 'rounded-lg bg-slate-600 px-3 py-1 text-xs font-bold text-white cursor-default';
+        this.disabled = true;
+        var allPaid = document.querySelectorAll('.pay-seat-btn:not([disabled])').length === 0;
+        if (allPaid) {
+          document.getElementById('confirmSplitPayment').classList.remove('hidden');
+        }
+      });
+    });
+    document.getElementById('confirmSplitPayment').classList.add('hidden');
+  });
+
+  // STRANGER BOOKS ALL
+  document.getElementById('strangerPayBtn').addEventListener('click', function() {
+    document.getElementById('paymentChoice').classList.add('hidden');
+    if (confirm('Stranger will book all seats. One person will pay for everyone. Continue?')) {
+      document.getElementById('bookBtn').click();
+    } else {
+      document.getElementById('paymentChoice').classList.remove('hidden');
+    }
+  });
+
+  // BIRTHDAY SPLIT
+  document.getElementById('birthdayPayBtn').addEventListener('click', function() {
+    document.getElementById('paymentChoice').classList.add('hidden');
+    document.getElementById('birthdayPayment').classList.remove('hidden');
+    var list2 = document.getElementById('birthdayPersonList');
+    list2.innerHTML = '';
+    var totalSeats2 = selectedSeats.length;
+    var pricePerSeat2 = 12.50;
+    var birthdayPrice = pricePerSeat2 / totalSeats2;
+    selectedSeats.forEach(function(seatIndex3, idx2) {
+      var seatNum2 = seatIndex3 + 1;
+      var row2 = String.fromCharCode(65 + Math.floor(seatIndex3 / 8));
+      var col2 = (seatIndex3 % 8) + 1;
+      var isBirthdayPerson = idx2 === 0;
+      var item2 = document.createElement('div');
+      item2.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-800/50';
+      if (isBirthdayPerson) {
+        item2.innerHTML = '<span class="text-sm text-white">Birthday Person - Seat ' + row2 + col2 + ' - GBP ' + pricePerSeat2.toFixed(2) + '</span><span class="text-xs text-purple-400">Everyone shares this cost</span>';
+      } else {
+        var sharedCost = pricePerSeat2 + birthdayPrice;
+        item2.innerHTML = '<span class="text-sm text-white">Person ' + (idx2 + 1) + ' - Seat ' + row2 + col2 + ' - GBP ' + sharedCost.toFixed(2) + '</span><button class="pay-birthday-btn rounded-lg bg-purple-600 px-3 py-1 text-xs font-bold text-white hover:bg-purple-500 transition-colors" data-seat="' + seatNum2 + '" data-person="' + (idx2 + 1) + '">Pay Now</button>';
+      }
+      list2.appendChild(item2);
+    });
+    var bdayBtns = document.querySelectorAll('.pay-birthday-btn');
+    bdayBtns.forEach(function(btn2) {
+      btn2.addEventListener('click', function() {
+        this.textContent = 'Paid!';
+        this.className = 'rounded-lg bg-slate-600 px-3 py-1 text-xs font-bold text-white cursor-default';
+        this.disabled = true;
+        var allPaid2 = document.querySelectorAll('.pay-birthday-btn:not([disabled])').length === 0;
+        if (allPaid2) {
+          document.getElementById('confirmBirthdayPayment').classList.remove('hidden');
+        }
+      });
+    });
+    document.getElementById('confirmBirthdayPayment').classList.add('hidden');
+  });
+
+  // CONFIRM SPLIT PAYMENT
+  document.getElementById('confirmSplitPayment').addEventListener('click', function() {
+    var seatNumbers = selectedSeats.map(function(s) { return s + 1; });
+    seatNumbers.forEach(function(n) { availableSeats[n - 1] = false; });
+    selectedSeats = [];
+    suggestions = [];
+    document.getElementById('recContainer').innerHTML = '';
+    document.getElementById('votingBar').classList.add('hidden');
+    document.getElementById('splitPayment').classList.add('hidden');
+    document.getElementById('paymentChoice').classList.add('hidden');
+    renderSeats();
+    document.getElementById('agentStatus').textContent = 'All seats paid and confirmed!';
+    document.getElementById('bookBtn').textContent = 'Booking confirmed!';
+    document.getElementById('bookBtn').disabled = true;
+  });
+
+  // CONFIRM BIRTHDAY PAYMENT
+  document.getElementById('confirmBirthdayPayment').addEventListener('click', function() {
+    var seatNumbers2 = selectedSeats.map(function(s) { return s + 1; });
+    seatNumbers2.forEach(function(n) { availableSeats[n - 1] = false; });
+    selectedSeats = [];
+    suggestions = [];
+    document.getElementById('recContainer').innerHTML = '';
+    document.getElementById('votingBar').classList.add('hidden');
+    document.getElementById('birthdayPayment').classList.add('hidden');
+    document.getElementById('paymentChoice').classList.add('hidden');
+    renderSeats();
+    document.getElementById('agentStatus').textContent = 'Birthday booking confirmed! Everyone shared the cost.';
+    document.getElementById('bookBtn').textContent = 'Booking confirmed!';
+    document.getElementById('bookBtn').disabled = true;
+  });
+
+  // GROUP SIZE CHANGE
+  document.getElementById('groupSize').addEventListener('change', function() {
+    groupSize = parseInt(this.value);
+    document.getElementById('groupSizeDisplay').textContent = groupSize;
+    updateColumnChoices();
+  });
+
   document.getElementById('startVoteBtn')?.addEventListener('click', startVoting);
   document.getElementById('endVotingBtn')?.addEventListener('click', endVoting);
-  document.getElementById('groupSize')?.addEventListener('change', updateColumnChoices);
   document.getElementById('applyManualBtn')?.addEventListener('click', applyManualSelection);
   document.getElementById('bookBtn')?.addEventListener('click', bookTickets);
+
   updateColumnChoices();
   renderSeats();
   renderRecommendations();

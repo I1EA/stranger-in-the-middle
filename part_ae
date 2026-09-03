@@ -1,0 +1,165 @@
+    selectedSeats = [];
+    suggestions = [];
+    currentSuggestionIdx = -1;
+    votes = {};
+    document.getElementById('recContainer').innerHTML = '';
+    document.getElementById('votingBar').classList.add('hidden');
+    document.getElementById('bookBtn').style.display = 'none';
+    document.getElementById('agentBookBtn').style.display = 'none';
+    document.getElementById('agentStatus').textContent = '';
+    shuffleSome();
+    renderSeats();
+    updateStatus('Session reset. Click Find Seats to start again.');
+    showToast('Session reset');
+  });
+
+  function bookTickets(movieId, seats) {
+    var indices = seats.map(function(n) { return n - 1; });
+    var allFree = true;
+    indices.forEach(function(i) { if (i < 0 || i >= available.length || !available[i]) allFree = false; });
+    if (!allFree) return { success: false, error: 'Seats taken.' };
+    indices.forEach(function(i) { available[i] = false; });
+    if (currentSessionId) {
+      fetch('/api/sessions/' + currentSessionId + '/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seatIndices: indices, bookedBy: 'Stranger In The Middle Agent' })
+      }).catch(function() {});
+    }
+    return { success: true };
+  }
+
+  // ============================================================
+  // PAYMENT HANDLERS
+  // ============================================================
+
+  // SPLIT PAYMENT
+  document.getElementById('splitPayBtn').addEventListener('click', function() {
+    document.getElementById('paymentChoice').classList.add('hidden');
+    document.getElementById('splitPayment').classList.remove('hidden');
+    var list = document.getElementById('seatPaymentList');
+    list.innerHTML = '';
+    var pricePerSeat = 12.50;
+    selectedSeats.forEach(function(seatIndex2, idx) {
+      var seatNum = seatIndex2 + 1;
+      var row = String.fromCharCode(65 + Math.floor(seatIndex2 / 8));
+      var col = (seatIndex2 % 8) + 1;
+      var item = document.createElement('div');
+      item.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-800/50';
+      item.innerHTML = '<span class="text-sm text-white">Person ' + (idx + 1) + ' - Seat ' + row + col + ' - GBP ' + pricePerSeat.toFixed(2) + '</span><button class="pay-seat-btn rounded-lg bg-emerald-600 px-3 py-1 text-xs font-bold text-white hover:bg-emerald-500 transition-colors" data-seat="' + seatNum + '" data-person="' + (idx + 1) + '">Pay Now</button>';
+      list.appendChild(item);
+    });
+    var payBtns = document.querySelectorAll('.pay-seat-btn');
+    payBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        this.textContent = 'Paid!';
+        this.className = 'rounded-lg bg-slate-600 px-3 py-1 text-xs font-bold text-white cursor-default';
+        this.disabled = true;
+        var allPaid = document.querySelectorAll('.pay-seat-btn:not([disabled])').length === 0;
+        if (allPaid) {
+          document.getElementById('confirmSplitPayment').classList.remove('hidden');
+        }
+      });
+    });
+    document.getElementById('confirmSplitPayment').classList.add('hidden');
+  });
+
+  // STRANGER BOOKS ALL
+  document.getElementById('strangerPayBtn').addEventListener('click', function() {
+    document.getElementById('paymentChoice').classList.add('hidden');
+    if (confirm('Stranger will book all seats. One person will pay for everyone. Continue?')) {
+      document.getElementById('agentBookBtn').click();
+    } else {
+      document.getElementById('paymentChoice').classList.remove('hidden');
+    }
+  });
+
+  // BIRTHDAY SPLIT
+  document.getElementById('birthdayPayBtn').addEventListener('click', function() {
+    document.getElementById('paymentChoice').classList.add('hidden');
+    document.getElementById('birthdayPayment').classList.remove('hidden');
+    var list2 = document.getElementById('birthdayPersonList');
+    list2.innerHTML = '';
+    var totalSeats2 = selectedSeats.length;
+    var pricePerSeat2 = 12.50;
+    var birthdayPrice = pricePerSeat2 / totalSeats2;
+    selectedSeats.forEach(function(seatIndex3, idx2) {
+      var seatNum2 = seatIndex3 + 1;
+      var row2 = String.fromCharCode(65 + Math.floor(seatIndex3 / 8));
+      var col2 = (seatIndex3 % 8) + 1;
+      var isBirthdayPerson = idx2 === 0;
+      var item2 = document.createElement('div');
+      item2.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-800/50';
+      if (isBirthdayPerson) {
+        item2.innerHTML = '<span class="text-sm text-white">Birthday Person - Seat ' + row2 + col2 + ' - GBP ' + pricePerSeat2.toFixed(2) + '</span><span class="text-xs text-purple-400">Everyone shares this cost</span>';
+      } else {
+        var sharedCost = pricePerSeat2 + birthdayPrice;
+        item2.innerHTML = '<span class="text-sm text-white">Person ' + (idx2 + 1) + ' - Seat ' + row2 + col2 + ' - GBP ' + sharedCost.toFixed(2) + '</span><button class="pay-birthday-btn rounded-lg bg-purple-600 px-3 py-1 text-xs font-bold text-white hover:bg-purple-500 transition-colors" data-seat="' + seatNum2 + '" data-person="' + (idx2 + 1) + '">Pay Now</button>';
+      }
+      list2.appendChild(item2);
+    });
+    var bdayBtns = document.querySelectorAll('.pay-birthday-btn');
+    bdayBtns.forEach(function(btn2) {
+      btn2.addEventListener('click', function() {
+        this.textContent = 'Paid!';
+        this.className = 'rounded-lg bg-slate-600 px-3 py-1 text-xs font-bold text-white cursor-default';
+        this.disabled = true;
+        var allPaid2 = document.querySelectorAll('.pay-birthday-btn:not([disabled])').length === 0;
+        if (allPaid2) {
+          document.getElementById('confirmBirthdayPayment').classList.remove('hidden');
+        }
+      });
+    });
+    document.getElementById('confirmBirthdayPayment').classList.add('hidden');
+  });
+
+  // CONFIRM SPLIT PAYMENT
+  document.getElementById('confirmSplitPayment').addEventListener('click', function() {
+    var seatNumbers = selectedSeats.map(function(s) { return s + 1; });
+    seatNumbers.forEach(function(n) { available[n - 1] = false; });
+    selectedSeats = [];
+    suggestions = [];
+    currentSuggestionIdx = -1;
+    document.getElementById('recContainer').innerHTML = '';
+    document.getElementById('votingBar').classList.add('hidden');
+    document.getElementById('splitPayment').classList.add('hidden');
+    document.getElementById('paymentChoice').classList.add('hidden');
+    renderSeats();
+    document.getElementById('agentStatus').textContent = 'All seats paid and confirmed!';
+    updateStatus('Booking confirmed. Each person paid for their own seat.');
+    showToast('Booking confirmed. Each person paid for their own seat.');
+  });
+
+  // CONFIRM BIRTHDAY PAYMENT
+  document.getElementById('confirmBirthdayPayment').addEventListener('click', function() {
+    var seatNumbers2 = selectedSeats.map(function(s) { return s + 1; });
+    seatNumbers2.forEach(function(n) { available[n - 1] = false; });
+    selectedSeats = [];
+    suggestions = [];
+    currentSuggestionIdx = -1;
+    document.getElementById('recContainer').innerHTML = '';
+    document.getElementById('votingBar').classList.add('hidden');
+    document.getElementById('birthdayPayment').classList.add('hidden');
+    document.getElementById('paymentChoice').classList.add('hidden');
+    renderSeats();
+    document.getElementById('agentStatus').textContent = 'Birthday booking confirmed! Everyone shared the cost.';
+    updateStatus('Birthday booking confirmed. Group shared the birthday person seat cost.');
+    showToast('Birthday booking confirmed. Everyone shared the cost.');
+  });
+
+  // ============================================================
+  // AUTO-LOAD SESSION
+  // ============================================================
+  if (window.__SERVER_DATA__ && window.__SERVER_DATA__.initialSessionId) {
+    startSession('spiderman');
+  }
+
+  window.startSession = startSession;
+  window.renderSeats = renderSeats;
+  window.bookTickets = bookTickets;
+  window.copySessionLink = copySessionLink;
+  window.backToMovies = backToMovies;
+</script>
+
+</body>
+</html>

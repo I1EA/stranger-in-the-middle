@@ -8,8 +8,14 @@
     <h1 class="mt-2 text-4xl font-black text-white"><%= booking.movieTitle %></h1>
     <p class="mt-3 text-slate-400"><%= booking.venue %> &middot; <%= booking.showtime %></p>
     <div class="mt-8 grid sm:grid-cols-2 gap-4 text-left">
-      <div class="rounded-2xl bg-black/30 border border-slate-800 p-4"><span class="text-xs text-slate-500">Booking ID</span><div class="mt-1 font-mono text-white"><%= booking.bookingId %></div></div>
-      <div class="rounded-2xl bg-black/30 border border-slate-800 p-4"><span class="text-xs text-slate-500">Seats</span><div class="mt-1 text-white"><%= (booking.seats || []).map(seat => seat.label || seat).join(', ') %></div></div>
+      <div class="rounded-2xl bg-black/30 border border-slate-800 p-4">
+        <span class="text-xs text-slate-500">Booking ID</span>
+        <div class="mt-1 font-mono text-white"><%= booking.bookingId %></div>
+      </div>
+      <div class="rounded-2xl bg-black/30 border border-slate-800 p-4">
+        <span class="text-xs text-slate-500">Seats</span>
+        <div class="mt-1 text-white"><%= (booking.seats || []).map(seat => seat.label || seat).join(', ') %></div>
+      </div>
     </div>
     <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
       <a href="/bookings" class="inline-flex rounded-xl bg-red-600 px-5 py-3 font-bold text-white hover:bg-red-500">View my tickets</a>

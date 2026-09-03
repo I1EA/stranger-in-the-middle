@@ -15,12 +15,21 @@
             <div><h2 class="text-xl font-bold text-white"><%= booking.movieTitle %></h2><p class="mt-1 text-sm text-slate-400"><%= booking.venue %></p></div>
             <span class="text-xs font-mono text-emerald-400"><%= booking.bookingId %></span>
           </div>
-          <div class="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm"><span class="text-slate-400">Seats: <strong class="text-white"><%= booking.seatLabels %></strong></span><div class="flex items-center gap-3"><a href="/confirmation/<%= booking.bookingId %>" class="text-red-400 hover:text-red-300 font-semibold">Open pass &rarr;</a><button type="button" data-cancel-booking="<%= booking.bookingId %>" class="font-semibold text-slate-400 hover:text-red-300">Cancel</button></div></div>
+          <div class="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
+            <span class="text-slate-400">Seats: <strong class="text-white"><%= booking.seatLabels %></strong></span>
+            <div class="flex items-center gap-3">
+              <a href="/confirmation/<%= booking.bookingId %>" class="text-red-400 hover:text-red-300 font-semibold">Open pass &rarr;</a>
+              <button type="button" data-cancel-booking="<%= booking.bookingId %>" class="font-semibold text-slate-400 hover:text-red-300">Cancel</button>
+            </div>
+          </div>
         </article>
       <% }); %>
     </div>
   <% } else { %>
-    <div class="glass-panel rounded-2xl border border-slate-800 p-10 text-center"><p class="text-slate-300">No bookings yet.</p><a href="/" class="mt-4 inline-block text-red-400 hover:text-red-300">Find a movie &rarr;</a></div>
+    <div class="glass-panel rounded-2xl border border-slate-800 p-10 text-center">
+      <p class="text-slate-300">No bookings yet.</p>
+      <a href="/" class="mt-4 inline-block text-red-400 hover:text-red-300">Find a movie &rarr;</a>
+    </div>
   <% } %>
 </main>
 

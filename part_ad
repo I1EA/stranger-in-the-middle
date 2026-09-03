@@ -1,0 +1,200 @@
+    }).then(function(json) {
+      if (json.data && json.data.seats) {
+        available = json.data.seats.slice();
+      } else {
+        shuffleSome();
+      }
+    }).catch(function() {
+      shuffleSome();
+    });
+    fetch('/api/sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ movieId: id, groupSize: groupSize })
+    }).then(function(res) {
+      return res.json();
+    }).then(function(json) {
+      if (json.data && json.data.session) {
+        currentSessionId = json.data.session.id;
+        window.location.href = '/session/' + encodeURIComponent(currentSessionId);
+        return;
+      }
+    }).catch(function() {
+      currentSessionId = 'session_' + Math.random().toString(36).substr(2, 6);
+    });
+    document.getElementById('movieList').classList.add('hidden');
+    document.getElementById('sessionSection').classList.remove('hidden');
+    document.getElementById('shareBanner').classList.remove('hidden');
+    var mv = movies[id] || { title: id, venue: 'Cinema', time: 'Tonight' };
+    document.getElementById('movieName').textContent = mv.title;
+    document.getElementById('movieDetails').textContent = mv.venue + ' · ' + mv.time;
+    document.getElementById('recContainer').innerHTML = '';
+    document.getElementById('agentStatus').textContent = '';
+    document.getElementById('votingBar').classList.add('hidden');
+    document.getElementById('startVoteBtn').classList.add('hidden');
+    document.getElementById('bookBtn').style.display = 'none';
+    document.getElementById('agentBookBtn').style.display = 'none';
+    renderSeats();
+    updateStatus('Session started for ' + mv.title + '. Click Find Seats to get options.');
+  }
+
+  // ============================================================
+  // EVENT LISTENERS
+  // ============================================================
+  document.querySelectorAll('[data-start-session]').forEach(function(button) {
+    button.addEventListener('click', function() {
+      startSession(button.dataset.startSession);
+    });
+  });
+  document.getElementById('backToMoviesBtn').addEventListener('click', backToMovies);
+  document.getElementById('copySessionLinkBtn').addEventListener('click', copySessionLink);
+
+  // ============================================================
+  // FIND SEATS BUTTON
+  // ============================================================
+  document.getElementById('findBtn').addEventListener('click', function() {
+    groupSize = parseInt(document.getElementById('groupSize').value);
+    var blocks = findBestBlocks();
+    if (blocks.length === 0) {
+      document.getElementById('agentStatus').textContent = 'No adjacent seats available for ' + groupSize + ' people. Try smaller group.';
+      updateStatus('No options found.');
+      return;
+    }
+    suggestions = blocks;
+    currentSuggestionIdx = -1;
+    selectedSeats = [];
+    votes = {};
+    for (var i = 0; i < suggestions.length; i++) {
+      suggestions[i].votes = 0;
+    }
+    hasVoted = false;
+    votingActive = false;
+    clearInterval(timerInterval);
+    document.getElementById('votingBar').classList.add('hidden');
+    var container = document.getElementById('recContainer');
+    container.innerHTML = '';
+    for (var j = 0; j < blocks.length; j++) {
+      var b = blocks[j];
+      var card = document.createElement('div');
+      card.className = 'rec-card';
+      var seatLabels = b.seats.map(function(s) { return seatLabel(s); }).join(', ');
+      var badgeHtml = '';
+      if (b.view === 'Center view' && b.leg === 'Extra legroom') badgeHtml = '<span class="tag-sm tag-best">Best Overall</span>';
+      else if (b.leg === 'Extra legroom') badgeHtml = '<span class="tag-sm tag-legroom">Extra Legroom</span>';
+      else if (b.view === 'Center view') badgeHtml = '<span class="tag-sm tag-best">Best View</span>';
+      else if (b.view === 'Good view' && b.leg === 'Good legroom') badgeHtml = '<span class="tag-sm tag-balanced">Balanced</span>';
+      card.innerHTML =
+        '<div class="label">Option ' + (j + 1) + '</div>' +
+        '<div class="desc">Seats ' + seatLabels + '</div>' +
+        '<div class="desc">' + b.view + ' · ' + b.leg + '</div>' +
+        '<div class="vote-count">0 votes</div>' +
+        '<button class="vote-btn">Vote</button>' +
+        badgeHtml;
+      (function(idx) {
+        card.onclick = function() {
+          if (votingActive) {
+            document.getElementById('agentStatus').textContent = 'Voting in progress. Use the vote button.';
+            return;
+          }
+          currentSuggestionIdx = idx;
+          selectedSeats = [];
+          var allCards = document.querySelectorAll('.rec-card');
+          allCards.forEach(function(el) { el.classList.remove('active'); });
+          card.classList.add('active');
+          var b2 = suggestions[idx];
+          var seatLabels2 = b2.seats.map(function(s) { return seatLabel(s); }).join(', ');
+          document.getElementById('agentStatus').textContent = 'Selected: Option ' + (idx + 1) + ' (seats ' + seatLabels2 + ')';
+          selectedSeats = b2.seats.slice();
+          renderSeats();
+          updateStatus('Selected: Option ' + (idx + 1) + ' ' + b2.view + ', ' + b2.leg);
+        };
+        var voteBtn = card.querySelector('.vote-btn');
+        if (voteBtn) {
+          voteBtn.onclick = function(e) {
+            e.stopPropagation();
+            if (!votingActive) {
+              document.getElementById('agentStatus').textContent = 'Voting not active. Click Find Seats then vote.';
+              return;
+            }
+            castVote(idx);
+          };
+        }
+      })(j);
+      container.appendChild(card);
+    }
+    document.getElementById('startVoteBtn').classList.remove('hidden');
+    document.getElementById('agentStatus').textContent = 'AI found ' + blocks.length + ' seat blocks for ' + groupSize + ' people.';
+    updateStatus('Found ' + blocks.length + ' options for ' + groupSize + ' people.');
+  });
+
+  document.getElementById('startVoteBtn').addEventListener('click', function() {
+    startVoting();
+  });
+
+  document.getElementById('endVotingBtn').addEventListener('click', function() {
+    if (votingActive) {
+      endVoting();
+      document.getElementById('votingStatus').textContent = 'Voting ended early by coordinator.';
+      document.getElementById('agentStatus').textContent = 'Voting ended early.';
+    }
+  });
+
+  document.getElementById('bookBtn').addEventListener('click', function() {
+    if (selectedSeats.length === 0) return;
+    var nums = selectedSeats.map(function(s) { return seatNumber(s); });
+    var button = this;
+    button.disabled = true;
+    button.textContent = 'Booking...';
+    fetch('/api/sessions/' + currentSessionId + '/book', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seatIndices: nums.map(function(n) { return n - 1; }), bookedBy: 'Group Member' })
+    }).then(function(response) {
+      return response.json();
+    }).then(function(data) {
+      if (!data.data || !data.data.booking || !data.data.booking.bookingId) {
+        throw new Error('Booking could not be completed.');
+      }
+      window.location.href = '/confirmation/' + data.data.booking.bookingId;
+    }).catch(function(error) {
+      button.disabled = false;
+      button.textContent = 'Confirm and pay';
+      document.getElementById('agentStatus').textContent = error.message;
+      updateStatus('Booking failed. Please choose available seats and try again.');
+    });
+  });
+
+  document.getElementById('agentBookBtn').addEventListener('click', function() {
+    if (selectedSeats.length === 0) return;
+    var nums = selectedSeats.map(function(s) { return seatNumber(s); });
+    var stillFree = true;
+    nums.forEach(function(n) { if (!available[n - 1]) stillFree = false; });
+    if (!stillFree) {
+      document.getElementById('agentStatus').textContent = 'Some seats taken by others! Booking failed.';
+      updateStatus('Booking failed seats taken.');
+      selectedSeats = [];
+      renderSeats();
+      return;
+    }
+    var result = bookTickets(selectedMovieId, nums);
+    if (result.success) {
+      selectedSeats = [];
+      suggestions = [];
+      currentSuggestionIdx = -1;
+      document.getElementById('recContainer').innerHTML = '';
+      document.getElementById('votingBar').classList.add('hidden');
+      renderSeats();
+      var seatLabels3 = nums.map(function(n) { return seatLabel(n - 1); }).join(', ');
+      document.getElementById('agentStatus').textContent = 'Stranger In The Middle booked all seats!';
+      updateStatus('Stranger booked seats ' + seatLabels3 + ' for everyone.');
+      showToast('Stranger In The Middle booked all tickets successfully');
+    } else {
+      document.getElementById('agentStatus').textContent = 'Booking failed: ' + result.error;
+      updateStatus('Stranger booking failed.');
+    }
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function() {
+    clearInterval(timerInterval);
+    votingActive = false;
+    sessionActive = false;
