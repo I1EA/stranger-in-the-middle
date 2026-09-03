@@ -15,6 +15,11 @@ router.post(
   catchAsync(async (req, res) => {
     const { movieId = 'spiderman', groupSize = 4, organizerName = 'Stranger Coordinator' } = req.body;
 
+    const movie = db.getMovie(movieId);
+    if (!movie) {
+      throw new ExpressError(`Movie with ID '${movieId}' not found`, 404);
+    }
+
     const parsedSize = parseInt(groupSize, 10);
     if (isNaN(parsedSize) || parsedSize < 1 || parsedSize > 8) {
       throw new ExpressError('Group size must be between 1 and 8', 400);
@@ -87,15 +92,19 @@ router.post(
   '/:id/start-voting',
   catchAsync(async (req, res) => {
     const { durationSeconds = 120 } = req.body;
-    const session = db.startVoting(req.params.id, durationSeconds);
+    const session = db.getSession(req.params.id);
     if (!session) {
       throw new ExpressError(`Session with ID '${req.params.id}' not found`, 404);
     }
 
+    const parsedDuration = parseInt(durationSeconds, 10);
+    const duration = isNaN(parsedDuration) || parsedDuration < 1 ? 120 : parsedDuration;
+    const updatedSession = db.startVoting(req.params.id, duration);
+
     res.status(200).json({
       status: 'success',
       message: 'Voting session activated',
-      data: { session },
+      data: { session: updatedSession },
     });
   })
 );
@@ -114,16 +123,38 @@ router.post(
       throw new ExpressError('optionIndex is required to cast a vote', 400);
     }
 
-    const session = db.castVote(req.params.id, {
+    const session = db.getSession(req.params.id);
+    if (!session) {
+      throw new ExpressError(`Session with ID '${req.params.id}' not found`, 404);
+    }
+
+    const parsedOption = parseInt(optionIndex, 10);
+    if (isNaN(parsedOption) || parsedOption < 0 || parsedOption >= session.suggestions.length) {
+      throw new ExpressError(
+        `Invalid option index ${optionIndex}. Must be between 0 and ${Math.max(0, session.suggestions.length - 1)}.`,
+        400
+      );
+    }
+
+    const updatedSession = db.castVote(req.params.id, {
       voterId: voterId || req.session?.voterId,
       voterName: voterName || req.session?.voterName || 'Group Member',
-      optionIndex: parseInt(optionIndex, 10),
+      optionIndex: parsedOption,
     });
 
     res.status(200).json({
       status: 'success',
-      message: `Vote recorded for Option ${parseInt(optionIndex, 10) + 1}`,
-      data: { session },
+      message: `Vote recorded for Option ${parsedOption + 1}`,
+      data: {
+        success: true,
+        sessionId: updatedSession.id,
+        votedOptionIndex: parsedOption,
+        voteCounts: updatedSession.voteCounts,
+        sessionStatus: updatedSession.status,
+        winnerOptionIndex: updatedSession.winnerOptionIndex,
+        winningSeats: updatedSession.winningSeats,
+        session: updatedSession,
+      },
     });
   })
 );
