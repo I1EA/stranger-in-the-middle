@@ -66,7 +66,6 @@
 
 <script>
   const sessionId = <%- JSON.stringify(sessionId) %>;
-  window.__ACTIVE_SESSION_ID__ = sessionId;
   const sessionSuggestions = <%- JSON.stringify(session.suggestions || []) %>;
   const availableSeats = <%- JSON.stringify(session.available || []) %>;
   let suggestions = sessionSuggestions.map((option) => ({ ...option, votes: 0 }));
@@ -125,11 +124,26 @@
     }).catch(() => {});
   }
 
+  // ============================================================
+  // BOOK TICKETS - WITH PAYMENT CHECK
+  // ============================================================
   async function bookTickets() {
     if (selectedSeats.length === 0) {
       document.getElementById('agentStatus').textContent = 'Select a seat block before booking.';
       return;
     }
+    
+    // Check if payment choice is visible
+    var paymentChoice = document.getElementById('paymentChoice');
+    if (paymentChoice.classList.contains('hidden')) {
+      document.getElementById('agentStatus').textContent = 'Please choose a payment option first.';
+      paymentChoice.classList.remove('hidden');
+      paymentChoice.style.display = 'block';
+      paymentChoice.style.visibility = 'visible';
+      paymentChoice.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    
     const response = await fetch('/api/sessions/' + encodeURIComponent(sessionId) + '/book', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ seatIndices: selectedSeats, bookedBy: 'Group Coordinator' })
@@ -248,9 +262,6 @@
     }).catch(() => {});
   }
 
-  // ============================================================
-  // END VOTING - FORCED TO SHOW PAYMENT OPTIONS
-  // ============================================================
   async function endVoting() {
     if (!votingActive) return;
     votingActive = false;
@@ -261,22 +272,15 @@
       document.getElementById('votingStatus').textContent = 'Winner: Option ' + (winnerIndex + 1);
       document.getElementById('agentStatus').textContent = 'Option ' + (winnerIndex + 1) + ' selected by group vote.';
       
-      // ============================================================
-      // FORCE SHOW PAYMENT CHOICE
-      // ============================================================
+      // Show payment choice
       var paymentChoice = document.getElementById('paymentChoice');
       if (paymentChoice) {
         paymentChoice.classList.remove('hidden');
         paymentChoice.style.display = 'block';
         paymentChoice.style.visibility = 'visible';
+        paymentChoice.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-      var agentStatus = document.getElementById('agentStatus');
-      if (agentStatus) {
-        agentStatus.textContent = 'Choose how to book: split, all at once, or birthday.';
-      }
-      // Scroll to payment options
-      paymentChoice.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
+      document.getElementById('agentStatus').textContent = 'Choose how to book: split, all at once, or birthday.';
     } else {
       document.getElementById('votingStatus').textContent = 'No votes cast. Select an option to continue.';
     }
@@ -323,7 +327,7 @@
   document.getElementById('strangerPayBtn').addEventListener('click', function() {
     document.getElementById('paymentChoice').classList.add('hidden');
     if (confirm('Stranger will book all seats. One person will pay for everyone. Continue?')) {
-      document.getElementById('bookBtn').click();
+      bookTickets();
     } else {
       document.getElementById('paymentChoice').classList.remove('hidden');
     }
