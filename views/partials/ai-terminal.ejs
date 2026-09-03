@@ -1,5 +1,5 @@
-<%# Stranger In The Middle AI Agent Live Terminal %>
-<div class="glass-panel rounded-3xl p-5 sm:p-6 border border-slate-800/80 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+<%# Stranger In The Middle AI Agent Live Terminal - Dynamic Session Aware %>
+<div class="glass-panel rounded-3xl p-5 sm:p-6 border border-slate-800/80 shadow-2xl relative overflow-hidden flex flex-col justify-between" id="sitmAiTerminal">
   
   <div class="ai-scanline"></div>
 
@@ -11,55 +11,372 @@
       </div>
       <div>
         <h4 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-          <span>SITM Coordinator Bot</span>
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>SITM Decision Terminal</span>
+          <span id="terminalPulseDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
         </h4>
-        <span class="text-[11px] text-slate-400">Anti-Stranger Contiguity Engine</span>
+        <span class="text-[11px] text-slate-400">WebMCP Workflow Visualizer</span>
       </div>
     </div>
     
-    <span class="px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-[10px] font-mono text-emerald-400">
-      ● ACTIVE LOCK
+    <span id="terminalStatusBadge" class="px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-[10px] font-mono text-emerald-400">
+      ● CONNECTING...
     </span>
   </div>
 
-  <!-- Metric Gauges -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 text-xs font-mono">
-    <div class="p-3 rounded-2xl bg-black/40 border border-slate-800">
-      <span class="text-slate-500 text-[10px] block uppercase">Sightline Quality</span>
-      <span id="sightlineMetric" class="text-emerald-400 font-bold text-sm">9.8 / 10 (Direct Center)</span>
+  <!-- Session Context Bar -->
+  <div class="p-3 rounded-2xl bg-black/40 border border-slate-800/80 mb-4 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+    <div class="flex items-center gap-2 text-slate-300 min-w-0">
+      <span class="text-slate-500 text-[10px] uppercase shrink-0">Movie:</span>
+      <span id="terminalMovieTitle" class="font-bold text-white truncate max-w-48 sm:max-w-xs">Connecting...</span>
     </div>
-    <div class="p-3 rounded-2xl bg-black/40 border border-slate-800">
-      <span class="text-slate-500 text-[10px] block uppercase">Stranger Risk</span>
-      <span class="text-emerald-400 font-bold text-sm">0.0% (Single Lock)</span>
+    <div class="flex items-center gap-3 text-[11px] shrink-0">
+      <span class="text-slate-400">Group: <strong id="terminalGroupSize" class="text-emerald-400 font-bold">-</strong></span>
+      <span class="text-slate-600">|</span>
+      <span class="text-slate-400">Room: <strong id="terminalRoomCode" class="text-slate-200 font-bold">-</strong></span>
     </div>
   </div>
 
-  <!-- Terminal Log Feed -->
-  <div class="flex-1 space-y-2 font-mono text-[11px] text-slate-400 bg-black/60 p-3.5 rounded-2xl border border-slate-800/80 overflow-y-auto max-h-36">
-    <div class="flex items-start gap-1.5 text-slate-300">
-      <span class="text-red-500">❯</span>
-      <span id="agentLog1">Initialized session state. Calculating geometric seat distances...</span>
+  <!-- Dynamic Metric Gauges -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4 text-xs font-mono">
+    <div class="p-2.5 rounded-2xl bg-black/50 border border-slate-800">
+      <span class="text-slate-500 text-[9px] block uppercase">Session Phase</span>
+      <span id="terminalPhase" class="text-emerald-400 font-bold text-xs truncate block">INITIALIZING</span>
     </div>
-    <div class="flex items-start gap-1.5 text-blue-400">
-      <span class="text-blue-500">❯</span>
-      <span id="agentLog2">Evaluated acoustic center & legroom factors across 48 cinema seats.</span>
+    <div class="p-2.5 rounded-2xl bg-black/50 border border-slate-800">
+      <span class="text-slate-500 text-[9px] block uppercase">Contiguous Options</span>
+      <span id="terminalOptionsCount" class="text-blue-400 font-bold text-xs truncate block">-</span>
     </div>
-    <div class="flex items-start gap-1.5 text-emerald-400">
-      <span class="text-emerald-500">❯</span>
-      <span id="agentLog3">Ready for group voting. No strangers permitted in winning block.</span>
+    <div class="p-2.5 rounded-2xl bg-black/50 border border-slate-800">
+      <span class="text-slate-500 text-[9px] block uppercase">Group Votes</span>
+      <span id="terminalVoteTally" class="text-amber-400 font-bold text-xs truncate block">0 / -</span>
+    </div>
+    <div class="p-2.5 rounded-2xl bg-black/50 border border-slate-800">
+      <span class="text-slate-500 text-[9px] block uppercase">Block Quality Score</span>
+      <span id="sightlineMetric" class="text-emerald-400 font-bold text-xs truncate block">-</span>
+    </div>
+  </div>
+
+  <!-- Live Event Log Feed -->
+  <div class="mb-3">
+    <div class="flex items-center justify-between text-[10px] uppercase font-mono text-slate-500 mb-1.5 px-1">
+      <span>Agent Activity Trace</span>
+      <span id="terminalSyncIndicator" class="text-slate-500">Live</span>
+    </div>
+    <div id="terminalLogFeed" class="space-y-1.5 font-mono text-[11px] text-slate-400 bg-black/70 p-3 rounded-2xl border border-slate-800/90 overflow-y-auto max-h-36 min-h-24">
+      <div class="flex items-start gap-1.5 text-slate-400">
+        <span class="text-blue-500">❯</span>
+        <span>Initializing decision terminal...</span>
+      </div>
     </div>
   </div>
 
   <!-- Anti-Stranger Guarantee Footer -->
-  <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400">
+  <div class="mt-auto pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400">
     <span class="flex items-center gap-1.5">
       <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
         <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
       </svg>
       <span>Contiguous Seat Guarantee</span>
     </span>
-    <span class="text-slate-500">WebMCP v1.0</span>
+    <span class="font-mono text-[10px] text-slate-500">Polling active (1.5s)</span>
   </div>
 
 </div>
+
+<script>
+(() => {
+  const POLLING_INTERVAL_MS = 1500;
+  let pollingTimer = null;
+  let logHistory = [];
+  const MAX_LOGS = 25;
+
+  let prev = {
+    sessionId: null,
+    status: null,
+    groupSize: null,
+    suggestionsCount: null,
+    totalVotes: null,
+    winnerOptionIndex: null,
+    selectedSeatsStr: null,
+    isBooked: false,
+  };
+
+  const getSessionId = () => {
+    if (typeof window !== 'undefined') {
+      if (window.__ACTIVE_SESSION_ID__) return window.__ACTIVE_SESSION_ID__;
+      const match = window.location.pathname.match(/\/session\/([^\/]+)/);
+      if (match && match[1]) return decodeURIComponent(match[1]);
+    }
+    return null;
+  };
+
+  const seatLabel = (idx) => {
+    const row = Math.floor(idx / 8);
+    const col = idx % 8;
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+    return `${letters[row] || '?'}${col + 1}`;
+  };
+
+  const formatTimestamp = () => {
+    const now = new Date();
+    return now.toTimeString().split(' ')[0];
+  };
+
+  const addLog = (message, type = 'info') => {
+    const colorMap = {
+      info: 'text-slate-300',
+      success: 'text-emerald-400',
+      warn: 'text-amber-400',
+      accent: 'text-blue-400',
+      danger: 'text-red-400',
+    };
+    const iconMap = {
+      info: '❯',
+      success: '✓',
+      warn: '●',
+      accent: '❯',
+      danger: '✕',
+    };
+
+    const feed = document.getElementById('terminalLogFeed');
+    if (!feed) return;
+
+    const logEntry = {
+      time: formatTimestamp(),
+      text: message,
+      type,
+    };
+    logHistory.push(logEntry);
+    if (logHistory.length > MAX_LOGS) {
+      logHistory.shift();
+    }
+
+    const row = document.createElement('div');
+    row.className = `flex items-start gap-1.5 ${colorMap[type] || colorMap.info}`;
+    row.innerHTML = `<span class="text-slate-500 font-mono text-[9px] select-none shrink-0">${logEntry.time}</span> ` +
+                    `<span class="select-none font-bold shrink-0">${iconMap[type] || '❯'}</span> ` +
+                    `<span class="break-words">${message}</span>`;
+    feed.appendChild(row);
+    feed.scrollTop = feed.scrollHeight;
+  };
+
+  const setIdleState = () => {
+    const movieEl = document.getElementById('terminalMovieTitle');
+    const groupEl = document.getElementById('terminalGroupSize');
+    const roomEl = document.getElementById('terminalRoomCode');
+    const phaseEl = document.getElementById('terminalPhase');
+    const optEl = document.getElementById('terminalOptionsCount');
+    const voteEl = document.getElementById('terminalVoteTally');
+    const sightEl = document.getElementById('sightlineMetric');
+    const badgeEl = document.getElementById('terminalStatusBadge');
+    const pulseEl = document.getElementById('terminalPulseDot');
+
+    if (movieEl) movieEl.textContent = 'Waiting for group session...';
+    if (groupEl) groupEl.textContent = '—';
+    if (roomEl) roomEl.textContent = '—';
+    if (phaseEl) {
+      phaseEl.textContent = 'IDLE';
+      phaseEl.className = 'text-slate-400 font-bold text-xs truncate block';
+    }
+    if (optEl) optEl.textContent = '—';
+    if (voteEl) voteEl.textContent = '—';
+    if (sightEl) sightEl.textContent = '—';
+    if (badgeEl) {
+      badgeEl.textContent = '○ IDLE';
+      badgeEl.className = 'px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-[10px] font-mono text-slate-400';
+    }
+    if (pulseEl) pulseEl.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
+
+    if (prev.sessionId !== null) {
+      prev = { sessionId: null, status: null, groupSize: null, suggestionsCount: null, totalVotes: null, winnerOptionIndex: null, selectedSeatsStr: null, isBooked: false };
+      addLog('Session disconnected. Waiting for a group session...', 'info');
+    }
+  };
+
+  const updateTerminal = (session) => {
+    const movieEl = document.getElementById('terminalMovieTitle');
+    const groupEl = document.getElementById('terminalGroupSize');
+    const roomEl = document.getElementById('terminalRoomCode');
+    const phaseEl = document.getElementById('terminalPhase');
+    const optEl = document.getElementById('terminalOptionsCount');
+    const voteEl = document.getElementById('terminalVoteTally');
+    const sightEl = document.getElementById('sightlineMetric');
+    const badgeEl = document.getElementById('terminalStatusBadge');
+    const pulseEl = document.getElementById('terminalPulseDot');
+    const syncEl = document.getElementById('terminalSyncIndicator');
+
+    if (!session) {
+      setIdleState();
+      return;
+    }
+
+    if (syncEl) syncEl.textContent = 'Live · ' + formatTimestamp();
+
+    if (movieEl) movieEl.textContent = session.movie?.title || session.movieId || 'Cinema Screening';
+    if (groupEl) groupEl.textContent = session.groupSize || '—';
+    if (roomEl) roomEl.textContent = session.id || '—';
+
+    const statusUpper = (session.status || 'ready').toUpperCase();
+    if (phaseEl) {
+      phaseEl.textContent = statusUpper;
+      if (session.status === 'voting') phaseEl.className = 'text-amber-400 font-bold text-xs truncate block';
+      else if (session.status === 'booked') phaseEl.className = 'text-emerald-400 font-bold text-xs truncate block';
+      else if (session.status === 'ended') phaseEl.className = 'text-blue-400 font-bold text-xs truncate block';
+      else phaseEl.className = 'text-emerald-400 font-bold text-xs truncate block';
+    }
+
+    if (badgeEl) {
+      if (session.status === 'voting') {
+        badgeEl.textContent = '● VOTING ACTIVE';
+        badgeEl.className = 'px-2.5 py-1 rounded-full bg-amber-950/60 border border-amber-500/60 text-[10px] font-mono text-amber-300';
+      } else if (session.status === 'booked') {
+        badgeEl.textContent = '● BOOKED & LOCKED';
+        badgeEl.className = 'px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/60 text-[10px] font-mono text-emerald-300';
+      } else if (session.status === 'ended') {
+        badgeEl.textContent = '● CONSENSUS';
+        badgeEl.className = 'px-2.5 py-1 rounded-full bg-blue-950/60 border border-blue-500/60 text-[10px] font-mono text-blue-300';
+      } else {
+        badgeEl.textContent = '● READY';
+        badgeEl.className = 'px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-[10px] font-mono text-emerald-400';
+      }
+    }
+
+    if (pulseEl) {
+      if (session.status === 'voting') pulseEl.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping';
+      else if (session.status === 'booked') pulseEl.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
+      else pulseEl.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping';
+    }
+
+    const optCount = session.suggestions?.length || 0;
+    if (optEl) optEl.textContent = `${optCount} Block${optCount === 1 ? '' : 's'}`;
+
+    const totalVotes = Object.keys(session.votes || {}).length;
+    const groupSize = session.groupSize || 1;
+    if (voteEl) {
+      if (session.status === 'ended' || session.status === 'booked') {
+        voteEl.textContent = `Won: Opt ${(session.winnerOptionIndex ?? 0) + 1}`;
+      } else {
+        voteEl.textContent = `${totalVotes} / ${groupSize} Votes`;
+      }
+    }
+
+    if (sightEl) {
+      let activeBlock = null;
+      if (session.winnerOptionIndex !== null && session.winnerOptionIndex !== undefined && session.suggestions?.[session.winnerOptionIndex]) {
+        activeBlock = session.suggestions[session.winnerOptionIndex];
+      } else if (session.suggestions?.length > 0) {
+        activeBlock = session.suggestions[0];
+      }
+
+      if (activeBlock) {
+        sightEl.textContent = `${activeBlock.score?.toFixed(1) || '—'} · ${activeBlock.view || 'Center'}`;
+      } else {
+        sightEl.textContent = '—';
+      }
+    }
+
+    // Deduplicated state transition event logs
+    const isNewSession = session.id !== prev.sessionId;
+    if (isNewSession) {
+      const feed = document.getElementById('terminalLogFeed');
+      if (feed) feed.innerHTML = '';
+      logHistory = [];
+      addLog(`Session ${session.id} connected for "${session.movie?.title || session.movieId}" (${session.groupSize} seats)`, 'info');
+      prev.sessionId = session.id;
+    }
+
+    if (isNewSession || session.suggestions?.length !== prev.suggestionsCount || session.groupSize !== prev.groupSize) {
+      if (session.suggestions?.length > 0) {
+        const top = session.suggestions[0];
+        const topSeats = (top.seats || []).map(seatLabel).join(', ');
+        addLog(`Evaluated ${session.suggestions.length} contiguous seat blocks. Best: ${top.tag || 'Optimal'} [${topSeats}] (Score ${top.score})`, 'accent');
+      }
+      prev.suggestionsCount = session.suggestions?.length || 0;
+      prev.groupSize = session.groupSize;
+    }
+
+    if (session.status === 'voting' && prev.status !== 'voting') {
+      addLog(`Group voting countdown started (${session.timerSeconds || 120}s window)`, 'warn');
+    }
+
+    if (totalVotes !== prev.totalVotes && totalVotes > 0) {
+      let leaderText = '';
+      if (session.voteCounts && session.voteCounts.length > 0) {
+        const maxV = Math.max(...session.voteCounts);
+        const leaderIdx = session.voteCounts.indexOf(maxV);
+        if (maxV > 0) leaderText = ` · Leader: Option ${leaderIdx + 1} (${maxV} vote${maxV === 1 ? '' : 's'})`;
+      }
+      addLog(`Vote update: ${totalVotes} of ${groupSize} members cast votes${leaderText}`, 'warn');
+      prev.totalVotes = totalVotes;
+    }
+
+    if ((session.status === 'ended' && prev.status !== 'ended') ||
+        (session.winnerOptionIndex !== null && session.winnerOptionIndex !== undefined && prev.winnerOptionIndex === null)) {
+      const winIdx = session.winnerOptionIndex ?? 0;
+      const winSeats = (session.winningSeats || []).map(seatLabel).join(', ');
+      addLog(`Consensus reached: Option ${winIdx + 1} won [${winSeats}]. Ready to lock purchase.`, 'success');
+      prev.winnerOptionIndex = session.winnerOptionIndex;
+    }
+
+    const selSeatsStr = (session.selectedSeats || []).join(',');
+    if (selSeatsStr && selSeatsStr !== prev.selectedSeatsStr && session.status !== 'booked') {
+      const labels = (session.selectedSeats || []).map(seatLabel).join(', ');
+      addLog(`Seat block focused: ${labels}`, 'info');
+      prev.selectedSeatsStr = selSeatsStr;
+    }
+
+    const isNowBooked = session.status === 'booked' || (session.bookings && session.bookings.length > 0);
+    if (isNowBooked && !prev.isBooked) {
+      const latestBooking = session.bookings?.slice(-1)[0];
+      const bookingRef = latestBooking?.bookingId || 'SITM Confirmed';
+      const bookedSeats = latestBooking?.seatLabels || (session.winningSeats || []).map(seatLabel).join(', ');
+      addLog(`Group booking confirmed [${bookingRef}] for seats ${bookedSeats} via single atomic lock`, 'success');
+      prev.isBooked = true;
+    }
+
+    prev.status = session.status;
+  };
+
+  const fetchSessionState = async () => {
+    const sid = getSessionId();
+    if (!sid) {
+      setIdleState();
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/sessions/' + encodeURIComponent(sid));
+      if (!res.ok) {
+        if (res.status === 404) {
+          setIdleState();
+          return;
+        }
+        throw new Error('HTTP ' + res.status);
+      }
+      const data = await res.json();
+      if (data.data && data.data.session) {
+        updateTerminal(data.data.session);
+      }
+    } catch (err) {
+      const syncEl = document.getElementById('terminalSyncIndicator');
+      if (syncEl) syncEl.textContent = 'Syncing...';
+    }
+  };
+
+  const startPolling = () => {
+    if (pollingTimer) clearInterval(pollingTimer);
+    fetchSessionState();
+    pollingTimer = setInterval(fetchSessionState, POLLING_INTERVAL_MS);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startPolling, { once: true });
+  } else {
+    startPolling();
+  }
+
+  window.addEventListener('beforeunload', () => {
+    if (pollingTimer) clearInterval(pollingTimer);
+  });
+})();
+</script>
