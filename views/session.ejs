@@ -39,6 +39,7 @@
 
 <script>
   const sessionId = <%- JSON.stringify(sessionId) %>;
+  window.__ACTIVE_SESSION_ID__ = sessionId;
   const sessionSuggestions = <%- JSON.stringify(session.suggestions || []) %>;
   const availableSeats = <%- JSON.stringify(session.available || []) %>;
   let suggestions = sessionSuggestions.map((option) => ({ ...option, votes: 0 }));

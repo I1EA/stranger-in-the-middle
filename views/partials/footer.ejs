@@ -78,55 +78,82 @@
     </p>
 
     <div class="space-y-3">
-      <!-- Tool 1 -->
+      <!-- Tool 1: search_movies -->
       <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
         <div class="flex items-center justify-between mb-1.5">
           <span class="font-mono font-bold text-emerald-400">search_movies()</span>
           <button type="button" data-mcp-tool="search_movies" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
         </div>
-        <p class="text-slate-400 text-[11px]">Returns list of available movies, venues, and prices.</p>
+        <p class="text-slate-400 text-[11px]">Browse the cinema catalogue for movies, venues, and ticket prices.</p>
       </div>
 
-      <!-- Tool 2 -->
+      <!-- Tool 2: get_available_seats -->
       <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
         <div class="flex items-center justify-between mb-1.5">
           <span class="font-mono font-bold text-emerald-400">get_available_seats()</span>
           <button type="button" data-mcp-tool="get_available_seats" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
         </div>
-        <p class="text-slate-400 text-[11px]">Queries available seats for Spider-Man.</p>
+        <p class="text-slate-400 text-[11px]">Queries current seat availability for the selected movie.</p>
       </div>
 
-      <!-- Tool 3 -->
+      <!-- Tool 3: create_group_session -->
       <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
         <div class="flex items-center justify-between mb-1.5">
-          <span class="font-mono font-bold text-emerald-400">stranger_vote()</span>
-          <button type="button" data-mcp-tool="stranger_vote" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
+          <span class="font-mono font-bold text-emerald-400">create_group_session()</span>
+          <button type="button" data-mcp-tool="create_group_session" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
         </div>
-        <p class="text-slate-400 text-[11px]">Computes optimal contiguous blocks for 4 friends.</p>
+        <p class="text-slate-400 text-[11px]">Creates a group room and computes optimal contiguous seat blocks.</p>
       </div>
 
-      <!-- Tool 4 -->
+      <!-- Tool 4: get_session_state -->
+      <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="font-mono font-bold text-emerald-400">get_session_state()</span>
+          <button type="button" data-mcp-tool="get_session_state" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
+        </div>
+        <p class="text-slate-400 text-[11px]">Inspects live session status, seat suggestions, and vote tallies.</p>
+      </div>
+
+      <!-- Tool 5: start_group_voting -->
+      <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="font-mono font-bold text-emerald-400">start_group_voting()</span>
+          <button type="button" data-mcp-tool="start_group_voting" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
+        </div>
+        <p class="text-slate-400 text-[11px]">Activates synchronized voting countdown for the active session.</p>
+      </div>
+
+      <!-- Tool 6: cast_vote -->
+      <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="font-mono font-bold text-emerald-400">cast_vote()</span>
+          <button type="button" data-mcp-tool="cast_vote" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
+        </div>
+        <p class="text-slate-400 text-[11px]">Casts an AI or participant vote for a seat option in the active room.</p>
+      </div>
+
+      <!-- Tool 7: book_tickets -->
       <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
         <div class="flex items-center justify-between mb-1.5">
           <span class="font-mono font-bold text-emerald-400">book_tickets()</span>
           <button type="button" data-mcp-tool="book_tickets" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
         </div>
-        <p class="text-slate-400 text-[11px]">Books the highest-scoring available block for a new group.</p>
+        <p class="text-slate-400 text-[11px]">Atomically books the winning block for the active session.</p>
       </div>
 
-      <!-- Tool 5 -->
+      <!-- Tool 8: cancel_booking -->
       <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
         <div class="flex items-center justify-between mb-1.5">
           <span class="font-mono font-bold text-emerald-400">cancel_booking()</span>
           <button type="button" data-mcp-tool="cancel_booking" class="px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]">Run</button>
         </div>
-        <p class="text-slate-400 text-[11px]">Cancels a demo booking and releases its seats.</p>
+        <p class="text-slate-400 text-[11px]">Cancels the latest booking pass and releases seats.</p>
       </div>
     </div>
 
     <div>
       <h4 class="font-bold text-slate-300 text-xs mb-1.5">Tool Output Console</h4>
-      <pre id="mcpConsole" class="p-3 rounded-xl bg-black/80 border border-slate-800 font-mono text-[11px] text-emerald-300 overflow-x-auto h-48 whitespace-pre-wrap">WebMCP Ready. Click 'Run' on any tool above to execute.</pre>
+      <pre id="mcpConsole" class="p-3 rounded-xl bg-black/80 border border-slate-800 font-mono text-[11px] text-emerald-300 overflow-x-auto h-52 whitespace-pre-wrap">WebMCP Ready. Click 'Run' on any tool above to execute.</pre>
     </div>
   </div>
 </div>
@@ -137,21 +164,25 @@
     drawer.classList.toggle('translate-x-full');
   }
 
+  function getDrawerSessionId() {
+    if (window.__ACTIVE_SESSION_ID__) return window.__ACTIVE_SESSION_ID__;
+    const match = window.location.pathname.match(/\/session\/([^\/]+)/);
+    if (match && match[1]) return decodeURIComponent(match[1]);
+    return null;
+  }
+
   document.getElementById('webmcpStatusBadge')?.addEventListener('click', toggleMcpDrawer);
   document.getElementById('closeMcpDrawer')?.addEventListener('click', toggleMcpDrawer);
   document.getElementById('endVotingBtn')?.addEventListener('click', () => {
     if (typeof endVoting === 'function') endVoting();
   });
+
   document.querySelectorAll('[data-mcp-tool]').forEach((button) => {
     button.addEventListener('click', () => {
-      const input = button.dataset.mcpTool === 'get_available_seats'
-        ? { movieId: 'spiderman' }
-        : button.dataset.mcpTool === 'stranger_vote'
-          ? { movieId: 'spiderman', groupSize: 4 }
-          : {};
-      testMcpTool(button.dataset.mcpTool, input);
+      testMcpTool(button.dataset.mcpTool);
     });
   });
+
   document.querySelectorAll('[data-cancel-booking]').forEach((button) => {
     button.addEventListener('click', async () => {
       if (!window.confirm('Cancel this booking and release its seats?')) return;
@@ -168,71 +199,109 @@
     });
   });
 
-  async function testMcpTool(toolName, input = {}) {
+  async function testMcpTool(toolName) {
     const consoleEl = document.getElementById('mcpConsole');
     consoleEl.textContent = 'Executing tool: ' + toolName + '...\n';
+
     try {
-      if (window.navigator?.modelContext) {
-        // Try direct WebMCP tool call
-        const ctx = window.navigator.modelContext;
-        consoleEl.textContent = 'Calling navigator.modelContext with tool: ' + toolName + '...\n';
-      }
-      
-      // Execute matching API query for interactive demo
+      const activeSessionId = getDrawerSessionId();
+
       if (toolName === 'search_movies') {
         const res = await fetch('/api/movies');
         const data = await res.json();
-        consoleEl.textContent = JSON.stringify(data, null, 2);
+        consoleEl.textContent = JSON.stringify(data.data.movies, null, 2);
+
       } else if (toolName === 'get_available_seats') {
-        const res = await fetch('/api/movies/spiderman/seats');
+        // Use active movie if on session page, or default to first movie
+        const moviesRes = await fetch('/api/movies');
+        const moviesData = await moviesRes.json();
+        const firstMovie = moviesData.data.movies[0] || { id: 'spiderman' };
+        const res = await fetch('/api/movies/' + encodeURIComponent(firstMovie.id) + '/seats');
         const data = await res.json();
-        consoleEl.textContent = JSON.stringify(data, null, 2);
-      } else if (toolName === 'stranger_vote') {
+        consoleEl.textContent = JSON.stringify(data.data, null, 2);
+
+      } else if (toolName === 'create_group_session' || toolName === 'stranger_vote') {
+        const moviesRes = await fetch('/api/movies');
+        const moviesData = await moviesRes.json();
+        const movieToBook = moviesData.data.movies[0] || { id: 'spiderman' };
+
         const res = await fetch('/api/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ movieId: 'spiderman', groupSize: 4 })
+          body: JSON.stringify({ movieId: movieToBook.id, groupSize: 4, organizerName: 'WebMCP Drawer Agent' }),
         });
         const data = await res.json();
         const createdSession = data.data.session;
-        consoleEl.textContent = 'SITM AI Optimizer computed:\n' + JSON.stringify(createdSession.suggestions, null, 2) + '\n\nOpening the voting room...';
-        window.location.href = '/session/' + encodeURIComponent(createdSession.id);
+        window.__ACTIVE_SESSION_ID__ = createdSession.id;
+        consoleEl.textContent = 'Session created successfully:\n' + JSON.stringify(createdSession, null, 2) + '\n\nOpening session room...';
+        if (window.location.pathname !== '/session/' + createdSession.id) {
+          setTimeout(() => {
+            window.location.href = '/session/' + encodeURIComponent(createdSession.id);
+          }, 1000);
+        }
+
+      } else if (toolName === 'get_session_state') {
+        if (!activeSessionId) {
+          consoleEl.textContent = 'Notice: No active session open. Run create_group_session() first or navigate to a session room.';
+          return;
+        }
+        const res = await fetch('/api/sessions/' + encodeURIComponent(activeSessionId));
+        const data = await res.json();
+        consoleEl.textContent = 'Session State (' + activeSessionId + '):\n' + JSON.stringify(data.data.session, null, 2);
+
+      } else if (toolName === 'start_group_voting') {
+        if (!activeSessionId) {
+          consoleEl.textContent = 'Notice: No active session open. Run create_group_session() first or navigate to a session room.';
+          return;
+        }
+        const res = await fetch('/api/sessions/' + encodeURIComponent(activeSessionId) + '/start-voting', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ durationSeconds: 120 }),
+        });
+        const data = await res.json();
+        consoleEl.textContent = 'Voting Started for Session ' + activeSessionId + ':\n' + JSON.stringify(data.data.session, null, 2);
+
+      } else if (toolName === 'cast_vote') {
+        if (!activeSessionId) {
+          consoleEl.textContent = 'Notice: No active session open. Run create_group_session() first or navigate to a session room.';
+          return;
+        }
+        const res = await fetch('/api/sessions/' + encodeURIComponent(activeSessionId) + '/vote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ optionIndex: 0, voterName: 'WebMCP Drawer Agent' }),
+        });
+        const data = await res.json();
+        consoleEl.textContent = 'Vote Recorded for Session ' + activeSessionId + ':\n' + JSON.stringify(data.data, null, 2);
+
       } else if (toolName === 'book_tickets') {
-        const sessionRes = await fetch('/api/sessions', {
+        if (!activeSessionId) {
+          consoleEl.textContent = 'Notice: No active session open. Run create_group_session() first or navigate to a session room.';
+          return;
+        }
+        const res = await fetch('/api/sessions/' + encodeURIComponent(activeSessionId) + '/book', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ movieId: 'spiderman', groupSize: 4 })
+          body: JSON.stringify({ bookedBy: 'WebMCP Drawer Agent', paymentMethod: 'card' }),
         });
-        const sessionData = await sessionRes.json();
-        const session = sessionData.data.session;
-        const seats = session.suggestions[0]?.seats || [];
-        const bookingRes = await fetch('/api/sessions/' + session.id + '/book', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ seatIndices: seats, bookedBy: 'Stranger In The Middle AI' })
-        });
-        const bookingData = await bookingRes.json();
-        consoleEl.textContent = 'SITM AI booked session ' + session.id + ':\n' + JSON.stringify(bookingData, null, 2);
+        const data = await res.json();
+        consoleEl.textContent = 'Booking Confirmed for Session ' + activeSessionId + ':\n' + JSON.stringify(data.data, null, 2);
+
       } else if (toolName === 'cancel_booking') {
-        const sessionRes = await fetch('/api/sessions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ movieId: 'spiderman', groupSize: 2 })
-        });
-        const sessionData = await sessionRes.json();
-        const session = sessionData.data.session;
-        const bookingRes = await fetch('/api/sessions/' + session.id + '/book', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ seatIndices: session.suggestions[0].seats, bookedBy: 'Stranger In The Middle AI' })
-        });
-        const bookingData = await bookingRes.json();
-        const cancelRes = await fetch('/api/bookings/' + bookingData.data.booking.bookingId, { method: 'DELETE' });
+        const bookingsRes = await fetch('/api/bookings');
+        const bookingsData = await bookingsRes.json();
+        const latestBooking = bookingsData.data?.bookings?.slice(-1)[0];
+        if (!latestBooking) {
+          consoleEl.textContent = 'No bookings exist to cancel. Run book_tickets first.';
+          return;
+        }
+        const cancelRes = await fetch('/api/bookings/' + encodeURIComponent(latestBooking.bookingId), { method: 'DELETE' });
         const cancelData = await cancelRes.json();
-        consoleEl.textContent = 'SITM AI cancelled booking ' + bookingData.data.booking.bookingId + ':\n' + JSON.stringify(cancelData, null, 2);
+        consoleEl.textContent = 'Cancelled Booking (' + latestBooking.bookingId + '):\n' + JSON.stringify(cancelData, null, 2);
       }
     } catch (err) {
-      consoleEl.textContent = 'Error: ' + err.message;
+      consoleEl.textContent = 'Error executing ' + toolName + ': ' + err.message;
     }
   }
 </script>
